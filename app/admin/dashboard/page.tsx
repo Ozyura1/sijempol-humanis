@@ -22,7 +22,17 @@ export default function AdminDashboardPage() {
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showAspirasi, setShowAspirasi] = useState(false)
   const [filterStatus, setFilterStatus] = useState<"semua" | "baru" | "dibaca" | "diproses">("semua")
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string
+    layanan: string
+    tanggal: string
+    jam: string
+    lokasi: string
+    kapasitas: number
+    terdaftar: number
+    deskripsi: string
+    status: "tersedia" | "penuh" | "ditutup"
+  }>({
     title: "",
     layanan: "",
     tanggal: "",
@@ -31,7 +41,7 @@ export default function AdminDashboardPage() {
     kapasitas: 30,
     terdaftar: 0,
     deskripsi: "",
-    status: "tersedia" as const,
+    status: "tersedia",
   })
 
   // Check auth
