@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next"
 import { Inter, Plus_Jakarta_Sans } from "next/font/google"
 import "./globals.css"
 import { AgendaProvider } from "./providers/agenda-provider"
+import { AspirasiProvider } from "./providers/aspirasi-provider"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -34,7 +35,9 @@ export default function RootLayout({
     <html lang="id" suppressHydrationWarning>
       <body className={`${inter.variable} ${plusJakarta.variable} font-sans antialiased`}>
         <AgendaProvider>
-          {children}
+          <AspirasiProvider>
+            {children}
+          </AspirasiProvider>
         </AgendaProvider>
       </body>
     </html>

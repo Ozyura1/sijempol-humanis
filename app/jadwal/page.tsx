@@ -5,12 +5,14 @@ import { Calendar, ArrowRight, MapPin, Users, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAgenda } from "@/app/providers/agenda-provider"
 import { useState } from "react"
 
 export default function JadwalPage() {
   const { agendas } = useAgenda()
   const [selectedMonth, setSelectedMonth] = useState(new Date(2026, 4)) // May 2026
+  const [showLocationDialog, setShowLocationDialog] = useState(false)
 
   const daysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
@@ -66,7 +68,6 @@ export default function JadwalPage() {
             <Link href="/#layanan" className="hover:text-primary">Layanan</Link>
             <Link href="/#tentang" className="hover:text-primary">Tentang</Link>
             <Link href="/hubungi-kami" className="hover:text-primary">Kontak</Link>
-            <Link href="/cek-status" className="text-primary font-semibold">Cek Jadwal</Link>
           </nav>
         </div>
       </header>
@@ -219,7 +220,7 @@ export default function JadwalPage() {
                       </div>
                     </div>
 
-                    <Button className="w-full" size="lg">
+                    <Button className="w-full" size="lg" onClick={() => setShowLocationDialog(true)}>
                       Lihat Rincian Lokasi
                     </Button>
                   </div>
@@ -231,19 +232,6 @@ export default function JadwalPage() {
                     </p>
                   </div>
                 )}
-              </CardContent>
-            </Card>
-
-            {/* CTA */}
-            <Card className="bg-primary text-primary-foreground border-0">
-              <CardContent className="pt-6">
-                <h3 className="font-bold mb-2">Butuh Layanan Urgent?</h3>
-                <p className="text-sm opacity-90 mb-4">
-                  Gunakan fitur 'Lampur Bola' untuk asyanan prioritas lama dan disabilitas.
-                </p>
-                <Button variant="secondary" className="w-full" size="sm">
-                  Ajukan Sekarang
-                </Button>
               </CardContent>
             </Card>
           </div>
@@ -271,17 +259,17 @@ export default function JadwalPage() {
             <div>
               <h4 className="font-semibold mb-4">Dukungan</h4>
               <ul className="space-y-2 text-sm opacity-80">
-                <li><Link href="/" className="hover:opacity-100">FAQ</Link></li>
-                <li><Link href="/" className="hover:opacity-100">Kebijakan Privasi</Link></li>
-                <li><Link href="/" className="hover:opacity-100">Syarat & Ketentuan</Link></li>
+                <li><Link href="/faq" className="hover:opacity-100">FAQ</Link></li>
+                <li><Link href="/privacy" className="hover:opacity-100">Kebijakan Privasi</Link></li>
+                <li><Link href="/terms" className="hover:opacity-100">Syarat & Ketentuan</Link></li>
               </ul>
             </div>
             <div>
               <h4 className="font-semibold mb-4">Ikuti Kami</h4>
               <ul className="space-y-2 text-sm opacity-80">
-                <li><a href="#" className="hover:opacity-100">Facebook</a></li>
-                <li><a href="#" className="hover:opacity-100">Instagram</a></li>
-                <li><a href="#" className="hover:opacity-100">Twitter/X</a></li>
+                <li><a href="https://www.facebook.com/share/18BgFUKYgv/" className="hover:opacity-100">Facebook</a></li>
+                <li><a href="https://www.instagram.com/disdukkotategal?igsh=MWlyMXhlbzVhdzF2dw==" className="hover:opacity-100">Instagram</a></li>
+                <li><a href="https://x.com/DisdukKotaTegal?s=20" className="hover:opacity-100">Twitter/X</a></li>
               </ul>
             </div>
           </div>
@@ -290,6 +278,73 @@ export default function JadwalPage() {
           </div>
         </div>
       </footer>
+
+      {/* Location Detail Dialog */}
+      <Dialog open={showLocationDialog} onOpenChange={setShowLocationDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Detail Lokasi
+            </DialogTitle>
+            <DialogDescription>
+              Informasi lengkap lokasi kegiatan
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {selectedAgendaData && (
+              <>
+                <div>
+                  <h4 className="font-semibold mb-2">{selectedAgendaData.title}</h4>
+                  <p className="text-sm text-muted-foreground mb-4">{selectedAgendaData.deskripsi}</p>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3">
+                    <MapPin className="h-4 w-4 text-primary mt-1 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Alamat Lengkap</p>
+                      <p className="text-sm text-muted-foreground">{selectedAgendaData.lokasi}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <Calendar className="h-4 w-4 text-primary mt-1 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Tanggal & Waktu</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(selectedAgendaData.tanggal).toLocaleDateString("id-ID", {
+                          weekday: "long",
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                        })}
+                      </p>
+                      <p className="text-sm text-muted-foreground">{selectedAgendaData.jam}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3">
+                    <Users className="h-4 w-4 text-primary mt-1 shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium">Kapasitas</p>
+                      <p className="text-sm text-muted-foreground">
+                        {selectedAgendaData.terdaftar} dari {selectedAgendaData.kapasitas} peserta
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <p className="text-xs text-muted-foreground">
+                    Lokasi ini terletak di Kantor Disdukcapil Kota Tegal. Pastikan Anda datang tepat waktu dan membawa dokumen yang diperlukan.
+                  </p>
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import { usePathname } from "next/navigation"
 import {
   LayoutDashboard,
@@ -11,7 +12,6 @@ import {
   Settings,
   LogOut,
   ChevronDown,
-  Building2,
   Shield,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -83,9 +83,13 @@ export function Sidebar() {
     <aside className="flex h-screen w-64 flex-col bg-sidebar text-sidebar-foreground">
       {/* Header */}
       <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-4">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-          <Building2 className="h-6 w-6 text-primary-foreground" />
-        </div>
+        <Image
+          src="/logosijempol.jpeg"
+          alt="Logo"
+          width={40}
+          height={40}
+          className="rounded-lg"
+        />
         <div className="flex flex-col">
           <span className="text-sm font-semibold">JEBOL</span>
           <span className="text-xs text-sidebar-foreground/60">Disdukcapil</span>

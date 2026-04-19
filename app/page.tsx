@@ -1,8 +1,8 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image"
 import {
-  Building2,
   CreditCard,
   FileText,
   Heart,
@@ -83,9 +83,14 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <Building2 className="h-6 w-6 text-primary-foreground" />
-            </div>
+            <Image
+              src="/logosijempol.jpeg"
+              alt="SiJempol Humanis Logo"
+              width={40}
+              height={40}
+              className="rounded-lg"
+              priority
+            />
             <div>
               <span className="text-lg font-bold">SiJempol</span>
               <span className="ml-2 text-sm text-muted-foreground">Humanis</span>
@@ -102,48 +107,50 @@ export default function HomePage() {
             <Link href="#kontak" className="text-sm font-medium hover:text-primary">
               Kontak
             </Link>
+            <Link href="/jadwal" className="text-sm font-medium hover:text-primary">
+              Cek Jadwal
+            </Link>
           </nav>
-
-          <div className="flex items-center gap-3">
-            <Link href="/cek-status">
-              <Button variant="outline" size="sm">
-                Cek Status
-              </Button>
-            </Link>
-            <Link href="/login">
-              <Button size="sm">Masuk</Button>
-            </Link>
-          </div>
         </div>
       </header>
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background py-20 lg:py-32">
         <div className="container mx-auto px-4">
-          <div className="mx-auto max-w-3xl text-center">
-            <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
-              <Shield className="h-4 w-4" />
-              LAYANAN PUBLIC DIGITAL
+          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+            {/* Left Content */}
+            <div>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+                <Shield className="h-4 w-4" />
+                LAYANAN PUBLIC DIGITAL
+              </div>
+              <h1 className="text-balance text-4xl font-bold tracking-tight lg:text-6xl">
+                SiJempol
+                <span className="block text-primary">Humanis</span>
+              </h1>
+              <p className="mt-6 text-pretty text-lg text-muted-foreground lg:text-xl">
+                Nikmati kemudahan pengurusan dokumen kependudukan secara modern, transparan, dan tepat waktu langsunng dari genggaman Anda.
+              </p>
+              <div className="mt-10 flex flex-col items-start justify-start gap-4 sm:flex-row">
+                <Link href="#layanan">
+                  <Button size="lg" className="gap-2">
+                    Mulai Sekarang
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
-            <h1 className="text-balance text-4xl font-bold tracking-tight lg:text-6xl">
-              SiJempol
-              <span className="block text-primary">Humanis</span>
-            </h1>
-            <p className="mt-6 text-pretty text-lg text-muted-foreground lg:text-xl">
-              Nikmati kemudahan pengurusan dokumen kependudukan secara modern, transparan, dan tepat waktu langsunng dari genggaman Anda.
-            </p>
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Link href="/jadwal">
-                <Button size="lg" className="gap-2">
-                  Mulai Sekarang
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/jadwal">
-                <Button size="lg" variant="outline">
-                  Cek Status Pengajuan
-                </Button>
-              </Link>
+
+            {/* Right Image */}
+            <div className="relative hidden lg:block">
+              <Image
+                src="/gambardisdukcapil.jpeg"
+                alt="Disdukcapil Service"
+                width={500}
+                height={500}
+                className="rounded-lg shadow-lg"
+                priority
+              />
             </div>
           </div>
         </div>
@@ -215,7 +222,7 @@ export default function HomePage() {
               SiJempol Humanis adalah inisiatif unggulan dari Disdukcapil Kota Tegal untuk mendigitalisasi seluruh proses administrasi kependudukan. Kami menggunakan filosofi "Humanis" yang berarti melayani dengan empati, keramahan, dan kemudahan akses bagi seluruh lapisan masyarakat, memberikan hak identifikasi yang tidak lagi menunggu.
             </p>
           </div>
-          
+
           <div className="mt-12 grid gap-6 md:grid-cols-3">
             <div className="flex flex-col items-center text-center">
               <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10">
@@ -259,7 +266,7 @@ export default function HomePage() {
                   <Phone className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="font-semibold">Telepon & WhatsApp</h3>
-                <p className="mt-2 text-sm font-bold text-primary">0812-3456-7890</p>
+                <p className="mt-2 text-sm font-bold text-primary">0283343262</p>
                 <p className="text-xs text-muted-foreground">Hubungi kami untuk bantuan terkait layanan</p>
               </CardContent>
             </Card>
@@ -269,7 +276,7 @@ export default function HomePage() {
                   <Mail className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="font-semibold">Layanan Email</h3>
-                <p className="mt-2 text-sm font-bold text-primary">admin@disdukcapil.go.id</p>
+                <p className="mt-2 text-sm font-bold text-primary"> info@disdukcapiltegal.org</p>
                 <p className="text-xs text-muted-foreground">Kirimkan saran atau pertanyaan via email elektronik</p>
               </CardContent>
             </Card>
@@ -279,8 +286,8 @@ export default function HomePage() {
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="font-semibold">Alamat Kantor</h3>
-                <p className="mt-2 text-sm font-semibold">Jl. Pemuda No. 1</p>
-                <p className="text-xs text-muted-foreground">Tegal,  Jawa Tengah</p>
+                <p className="mt-2 text-sm font-semibold">Jl. Lele No.14, Tegalsari, Kec. Tegal Bar., Kota Tegal, Jawa Tengah 52111</p>
+
               </CardContent>
             </Card>
           </div>
@@ -302,9 +309,13 @@ export default function HomePage() {
           <div className="grid gap-8 md:grid-cols-4">
             <div>
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-                  <Building2 className="h-6 w-6 text-primary-foreground" />
-                </div>
+                <Image
+                  src="/logosijempol.jpeg"
+                  alt="SiJempol Humanis Logo"
+                  width={40}
+                  height={40}
+                  className="rounded-lg"
+                />
                 <div>
                   <span className="font-bold">SiJempol</span>
                   <p className="text-xs text-muted-foreground">Humanis</p>

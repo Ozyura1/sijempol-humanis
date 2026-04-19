@@ -6,16 +6,22 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ScrollArea } from "@/components/ui/scroll-area"
 import { useAgenda, Agenda } from "@/app/providers/agenda-provider"
-import { LogOut, Plus, Edit2, Trash2, X } from "lucide-react"
+import { useAspirasi } from "@/app/providers/aspirasi-provider"
+import { LogOut, Plus, Edit2, Trash2, X, MessageSquare } from "lucide-react"
 
 export default function AdminDashboardPage() {
   const router = useRouter()
   const { agendas, addAgenda, updateAgenda, deleteAgenda } = useAgenda()
+  const { aspirasi, updateAspirasiStatus } = useAspirasi()
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [showAspirasi, setShowAspirasi] = useState(false)
+  const [filterStatus, setFilterStatus] = useState<"semua" | "baru" | "dibaca" | "diproses">("semua")
   const [formData, setFormData] = useState({
     title: "",
     layanan: "",
@@ -98,6 +104,19 @@ export default function AdminDashboardPage() {
     }))
   }
 
+  const handleMarkAsRead = (id: string) => {
+    updateAspirasiStatus(id, "dibaca")
+  }
+
+  const handleMarkAsProcessed = (id: string) => {
+    updateAspirasiStatus(id, "diproses")
+  }
+
+  const getFilteredAspirasi = () => {
+    if (filterStatus === "semua") return aspirasi
+    return aspirasi.filter((a) => a.status === filterStatus)
+  }
+
   if (isLoading || !isAuthenticated) {
     return null
   }
@@ -127,17 +146,33 @@ export default function AdminDashboardPage() {
         {/* Add Button */}
         <div className="mb-8 flex justify-between items-center">
           <h2 className="text-3xl font-bold">Daftar Jadwal</h2>
-          <Button
-            onClick={() => {
-              setShowForm(!showForm)
-              if (editingId) handleResetForm()
-            }}
-            size="lg"
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Tambah Jadwal
-          </Button>
+          <div className="flex gap-3">
+            <Button
+              onClick={() => setShowAspirasi(true)}
+              variant="outline"
+              size="lg"
+              className="gap-2"
+            >
+              <MessageSquare className="h-4 w-4" />
+              Aspirasi Warga
+              {aspirasi.filter((a) => a.status === "baru").length > 0 && (
+                <Badge variant="destructive" className="ml-2">
+                  {aspirasi.filter((a) => a.status === "baru").length}
+                </Badge>
+              )}
+            </Button>
+            <Button
+              onClick={() => {
+                setShowForm(!showForm)
+                if (editingId) handleResetForm()
+              }}
+              size="lg"
+              className="gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Tambah Jadwal
+            </Button>
+          </div>
         </div>
 
         {/* Form Section */}
@@ -347,8 +382,8 @@ export default function AdminDashboardPage() {
                               agenda.status === "tersedia"
                                 ? "outline"
                                 : agenda.status === "penuh"
-                                ? "secondary"
-                                : "destructive"
+                                  ? "secondary"
+                                  : "destructive"
                             }
                           >
                             {agenda.status}
@@ -379,6 +414,133 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Dialog Aspirasi Warga */}
+      <Dialog open={showAspirasi} onOpenChange={setShowAspirasi}>
+        <DialogContent className="max-w-2xl max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <MessageSquare className="h-5 w-5" />
+              Aspirasi Warga
+            </DialogTitle>
+            <DialogDescription>
+              Kelola pesan dan aspirasi dari masyarakat
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {/* Filter Tabs */}
+            <div className="flex gap-2 border-b">
+              <Button
+                variant={filterStatus === "semua" ? "default" : "ghost"}
+                size="sm"
+                className="gap-2"
+                onClick={() => setFilterStatus("semua")}
+              >
+                Semua ({aspirasi.length})
+              </Button>
+              <Button
+                variant={filterStatus === "baru" ? "default" : "ghost"}
+                size="sm"
+                className="gap-2"
+                onClick={() => setFilterStatus("baru")}
+              >
+                Baru ({aspirasi.filter((a) => a.status === "baru").length})
+              </Button>
+              <Button
+                variant={filterStatus === "dibaca" ? "default" : "ghost"}
+                size="sm"
+                className="gap-2"
+                onClick={() => setFilterStatus("dibaca")}
+              >
+                Dibaca ({aspirasi.filter((a) => a.status === "dibaca").length})
+              </Button>
+              <Button
+                variant={filterStatus === "diproses" ? "default" : "ghost"}
+                size="sm"
+                className="gap-2"
+                onClick={() => setFilterStatus("diproses")}
+              >
+                Diproses ({aspirasi.filter((a) => a.status === "diproses").length})
+              </Button>
+            </div>
+
+            {/* Aspirasi List */}
+            <ScrollArea className="h-96 w-full rounded-md border p-4 space-y-4">
+              {getFilteredAspirasi().length === 0 ? (
+                <div className="flex items-center justify-center h-full text-muted-foreground">
+                  <p>Tidak ada aspirasi warga</p>
+                </div>
+              ) : (
+                getFilteredAspirasi().map((item) => (
+                  <div
+                    key={item.id}
+                    className={`p-4 rounded-lg border-l-4 ${item.status === "baru"
+                      ? "border-l-red-500 bg-red-50"
+                      : item.status === "dibaca"
+                        ? "border-l-blue-500 bg-blue-50"
+                        : "border-l-green-500 bg-green-50"
+                      }`}
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1">
+                        <p className="font-semibold text-sm">{item.nama}</p>
+                        <p className="text-xs text-muted-foreground">{item.email}</p>
+                      </div>
+                      <Badge
+                        variant={
+                          item.status === "baru"
+                            ? "destructive"
+                            : item.status === "dibaca"
+                              ? "secondary"
+                              : "default"
+                        }
+                        className="text-xs"
+                      >
+                        {item.status === "baru"
+                          ? "Baru"
+                          : item.status === "dibaca"
+                            ? "Dibaca"
+                            : "Diproses"}
+                      </Badge>
+                    </div>
+
+                    <p className="text-sm mb-3 text-gray-700">{item.pesan}</p>
+
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">
+                        {new Date(item.tanggal).toLocaleDateString("id-ID")}
+                      </p>
+                      <div className="flex gap-2">
+                        {item.status === "baru" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => handleMarkAsRead(item.id)}
+                            className="text-xs h-7"
+                          >
+                            Tandai Dibaca
+                          </Button>
+                        )}
+                        {item.status !== "diproses" && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={() => handleMarkAsProcessed(item.id)}
+                            className="text-xs h-7"
+                          >
+                            Proses
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </ScrollArea>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

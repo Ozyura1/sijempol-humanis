@@ -1,18 +1,23 @@
 "use client"
 
 import Link from "next/link"
-import { ArrowLeft, Phone, Mail, MapPin, Instagram } from "lucide-react"
+import Image from "next/image"
+import { ArrowLeft, Phone, Mail, MapPin, Instagram, CheckCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useState } from "react"
+import { useAspirasi } from "@/app/providers/aspirasi-provider"
 
 export default function HubungiKamiPage() {
+  const { addAspirasi } = useAspirasi()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   })
+  const [submitted, setSubmitted] = useState(false)
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -24,14 +29,25 @@ export default function HubungiKamiPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // Add your submit logic here
-    console.log("Form submitted:", formData)
-    // Reset form
+
+    // Tambah aspirasi ke context
+    addAspirasi({
+      nama: formData.name,
+      email: formData.email,
+      pesan: formData.message,
+      tanggal: new Date().toISOString().split('T')[0],
+    })
+
+    // Reset form dan tampilkan pesan sukses
     setFormData({
       name: "",
       email: "",
       message: "",
     })
+    setSubmitted(true)
+
+    // Hilangkan pesan sukses setelah 5 detik
+    setTimeout(() => setSubmitted(false), 5000)
   }
 
   return (
@@ -40,9 +56,14 @@ export default function HubungiKamiPage() {
       <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link href="/" className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-              <span className="text-sm font-bold text-primary-foreground">SJ</span>
-            </div>
+            <Image
+              src="/logosijempol.jpeg"
+              alt="SiJempol Humanis Logo"
+              width={40}
+              height={40}
+              className="rounded-lg"
+              priority
+            />
             <div>
               <span className="text-lg font-bold">SiJempol</span>
               <span className="ml-2 text-sm text-muted-foreground">Humanis</span>
@@ -52,11 +73,9 @@ export default function HubungiKamiPage() {
           <nav className="hidden items-center gap-6 md:flex text-sm">
             <Link href="/#layanan" className="hover:text-primary">Layanan</Link>
             <Link href="/#tentang" className="hover:text-primary">Tentang</Link>
-            <Link href="#informasi-kontak" className="font-semibold text-primary">Kontak</Link>
+            <Link href="#informasi-kontak" className="hover:text-primary">Kontak</Link>
             <Link href="/jadwal" className="hover:text-primary">Cek Jadwal</Link>
           </nav>
-
-          <div className="w-20" />
         </div>
       </header>
 
@@ -80,6 +99,14 @@ export default function HubungiKamiPage() {
               <CardDescription>Tinggalkan pesan Anda di bawah ini, tim kami akan merespons dalam 1×24 jam kerja.</CardDescription>
             </CardHeader>
             <CardContent>
+              {submitted && (
+                <Alert className="mb-4 bg-emerald-50 border-emerald-200">
+                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                  <AlertDescription className="text-emerald-800">
+                    Pesan Anda telah berhasil dikirim! Tim kami akan segera merespons.
+                  </AlertDescription>
+                </Alert>
+              )}
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <label htmlFor="name" className="block text-sm font-medium mb-2">Nama Lengkap</label>
@@ -141,7 +168,7 @@ export default function HubungiKamiPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold">Telepon CS</h4>
-                    <p className="text-primary font-bold">(0283) 351069</p>
+                    <p className="text-primary font-bold">0283343262</p>
                     <p className="text-xs text-muted-foreground">Senin - Jumat: 08:00 - 16:00 WIB</p>
                   </div>
                 </div>
@@ -165,7 +192,7 @@ export default function HubungiKamiPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold">Email Resmi</h4>
-                    <p className="text-primary font-bold">kontak@disdukcapil.tegalkota.go.id</p>
+                    <p className="text-primary font-bold">info@disdukcapiltegal.org</p>
                     <p className="text-xs text-muted-foreground">Kami akan merespons dalam 1×24 jam</p>
                   </div>
                 </div>
@@ -177,7 +204,7 @@ export default function HubungiKamiPage() {
                   </div>
                   <div>
                     <h4 className="font-semibold">Lokasi Kantor</h4>
-                    <p className="font-semibold text-sm">Jl. Diponegoro No. 4, Kol. Manah Sukasari, Kec. Tegal Timur, Kota Tegal, Jawa Tengah 52123</p>
+                    <p className="font-semibold text-sm">Jl. Lele No.14, Tegalsari, Kec. Tegal Bar., Kota Tegal, Jawa Tengah 52111</p>
                   </div>
                 </div>
               </CardContent>
@@ -192,7 +219,7 @@ export default function HubungiKamiPage() {
                     height="100%"
                     frameBorder="0"
                     title="Lokasi Kantor Disdukcapil Tegal"
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.0000000000005!2d109.1333333!3d-6.8833333!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6fb5c5c5c5c5c5%3A0x5c5c5c5c5c5c5c5c!2sDinas%20Kependudukan%20dan%20Pencatatan%20Sipil%20Kota%20Tegal!5e0!3m2!1sid!2sid!4v1234567890"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.272280512856!2d109.12842990000001!3d-6.8579337!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6fb9b828481605%3A0xe1b9994599edb6e1!2sDinas%20Kependudukan%20Dan%20Pencatatan%20Sipil!5e0!3m2!1sid!2sid!4v1776574624702!5m2!1sid!2sid"
                     style={{ border: 0 }}
                     allowFullScreen
                     loading="lazy"
@@ -236,7 +263,7 @@ export default function HubungiKamiPage() {
               <h4 className="font-semibold mb-4">Dukungan</h4>
               <ul className="space-y-2 text-sm opacity-80">
                 <li><Link href="/" className="hover:opacity-100">Bantuan</Link></li>
-                <li><Link href="/" className="hover:opacity-100">FAQ</Link></li>
+                <li><Link href="/faq" className="hover:opacity-100">FAQ</Link></li>
                 <li><Link href="/" className="hover:opacity-100">Kebijakan Privasi</Link></li>
               </ul>
             </div>
@@ -244,9 +271,9 @@ export default function HubungiKamiPage() {
             <div>
               <h4 className="font-semibold mb-4">Ikuti Kami</h4>
               <ul className="space-y-2 text-sm opacity-80">
-                <li><a href="#" className="hover:opacity-100">Facebook</a></li>
-                <li><a href="#" className="hover:opacity-100">Instagram</a></li>
-                <li><a href="#" className="hover:opacity-100">Twitter/X</a></li>
+                <li><a href="https://www.facebook.com/share/18BgFUKYgv/" className="hover:opacity-100">Facebook</a></li>
+                <li><a href="https://www.instagram.com/disdukkotategal?igsh=MWlyMXhlbzVhdzF2dw==" className="hover:opacity-100">Instagram</a></li>
+                <li><a href="https://x.com/DisdukKotaTegal?s=20" className="hover:opacity-100">Twitter/X</a></li>
               </ul>
             </div>
           </div>

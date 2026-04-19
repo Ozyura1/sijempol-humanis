@@ -30,10 +30,10 @@ const actions = [
     variant: "outline" as const,
   },
   {
-    title: "Perkawinan",
+    title: "Akta Perkawinan",
     description: "Pencatatan perkawinan",
     icon: Heart,
-    href: "/dashboard/perkawinan",
+    href: "/dashboard/perkawinan/pengajuan",
     variant: "outline" as const,
   },
   {
