@@ -1,0 +1,17 @@
+"use client"
+
+import { useEffect, ReactNode } from "react"
+import { useRouter } from "next/navigation"
+
+export default function AdminLayout({ children }: { children: ReactNode }) {
+  const router = useRouter()
+
+  useEffect(() => {
+    const auth = localStorage.getItem("adminAuth")
+    if (!auth) {
+      router.push("/admin/login")
+    }
+  }, [router])
+
+  return <>{children}</>
+}

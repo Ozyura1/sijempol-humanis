@@ -1,0 +1,13 @@
+{
+  "name": "jebol-web-app",
+  "version": "1.0.0",
+  "description": "JEBOL Government Administration System - Web Frontend (Lightweight)",
+  "type": "module",
+  "scripts": {
+    "start": "npx http-server . -p 3000 -c-1",
+    "dev": "npx http-server . -p 3000 -c-1 --cors"
+  },
+  "keywords": ["government", "administration", "jebol"],
+  "author": "JEBOL Development",
+  "license": "MIT"
+}

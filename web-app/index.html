@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JEBOL - Government Administration System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        [data-page] { display: none; }
+        [data-page].active { display: block; }
+        .btn-primary { @apply px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition; }
+        .btn-secondary { @apply px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 transition; }
+        .input-field { @apply w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:border-blue-500; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-blue-900 text-white p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">🏛️ JEBOL System</h1>
+            <div id="nav-menu" class="flex gap-4 items-center">
+                <span id="user-display" class="text-sm"></span>
+                <button onclick="app.logout()" class="btn-secondary text-sm">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Login Page -->
+    <div data-page="login" class="active min-h-screen flex items-center justify-center">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-96">
+            <h2 class="text-2xl font-bold mb-6 text-center">Login JEBOL</h2>
+            <form onsubmit="app.handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Username</label>
+                    <input type="text" id="username" class="input-field" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Password</label>
+                    <input type="password" id="password" class="input-field" required>
+                </div>
+                <button type="submit" class="btn-primary w-full">Login</button>
+                <p id="login-error" class="text-red-500 text-sm mt-2"></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Page -->
+    <div data-page="dashboard" class="max-w-7xl mx-auto p-6">
+        <h2 class="text-3xl font-bold mb-6">Dashboard</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg cursor-pointer" onclick="app.showPage('ktp')">
+                <h3 class="text-xl font-bold text-blue-600">📋 KTP Submissions</h3>
+                <p class="text-gray-600 mt-2">Manage KTP/ID submissions</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg cursor-pointer" onclick="app.showPage('ikd')">
+                <h3 class="text-xl font-bold text-green-600">📊 IKD Reports</h3>
+                <p class="text-gray-600 mt-2">View IKD statistics</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg cursor-pointer" onclick="app.showPage('perkawinan')">
+                <h3 class="text-xl font-bold text-pink-600">💍 Marriage Records</h3>
+                <p class="text-gray-600 mt-2">Manage marriage data</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- KTP Management Page -->
+    <div data-page="ktp" class="max-w-7xl mx-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold">KTP Management</h2>
+            <button onclick="app.showPage('dashboard')" class="btn-secondary">← Back</button>
+        </div>
+        <button onclick="app.showPage('ktp-form')" class="btn-primary mb-4">+ Add KTP</button>
+        <div id="ktp-list" class="grid grid-cols-1 gap-4"></div>
+    </div>
+
+    <!-- KTP Form Page -->
+    <div data-page="ktp-form" class="max-w-2xl mx-auto p-6">
+        <h2 class="text-2xl font-bold mb-6">KTP Submission Form</h2>
+        <form onsubmit="app.handleKtpSubmit(event)" class="bg-white p-6 rounded-lg shadow">
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">NIK</label>
+                <input type="text" id="ktp-nik" class="input-field" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Name</label>
+                <input type="text" id="ktp-name" class="input-field" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Address</label>
+                <textarea id="ktp-address" class="input-field" required></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Status</label>
+                <select id="ktp-status" class="input-field" required>
+                    <option value="">Select Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">Save</button>
+                <button type="button" onclick="app.showPage('ktp')" class="btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- IKD Page -->
+    <div data-page="ikd" class="max-w-7xl mx-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold">IKD Statistics</h2>
+            <button onclick="app.showPage('dashboard')" class="btn-secondary">← Back</button>
+        </div>
+        <div id="ikd-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+    </div>
+
+    <!-- Marriage Records Page -->
+    <div data-page="perkawinan" class="max-w-7xl mx-auto p-6">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-3xl font-bold">Marriage Records</h2>
+            <button onclick="app.showPage('dashboard')" class="btn-secondary">← Back</button>
+        </div>
+        <button onclick="app.showPage('perkawinan-form')" class="btn-primary mb-4">+ Add Record</button>
+        <div id="perkawinan-list" class="grid grid-cols-1 gap-4"></div>
+    </div>
+
+    <!-- Marriage Form Page -->
+    <div data-page="perkawinan-form" class="max-w-2xl mx-auto p-6">
+        <h2 class="text-2xl font-bold mb-6">Marriage Record Form</h2>
+        <form onsubmit="app.handlePerkawinanSubmit(event)" class="bg-white p-6 rounded-lg shadow">
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Groom Name</label>
+                <input type="text" id="perkawinan-groom" class="input-field" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Bride Name</label>
+                <input type="text" id="perkawinan-bride" class="input-field" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Marriage Date</label>
+                <input type="date" id="perkawinan-date" class="input-field" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-sm font-medium mb-2">Location</label>
+                <input type="text" id="perkawinan-location" class="input-field" required>
+            </div>
+            <div class="flex gap-2">
+                <button type="submit" class="btn-primary">Save</button>
+                <button type="button" onclick="app.showPage('perkawinan')" class="btn-secondary">Cancel</button>
+            </div>
+        </form>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
