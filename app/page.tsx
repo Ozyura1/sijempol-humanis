@@ -87,7 +87,7 @@ export default function HomePage() {
       <section className="relative overflow-hidden bg-background py-20 lg:py-32">
         <div className="pointer-events-none absolute inset-0 lg:hidden">
           <div className="absolute inset-0 bg-[length:120%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/disdukcapilmobile.jpeg')" }} />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/25 to-transparent" />
+
         </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex min-h-[70vh] flex-col justify-end pb-10 lg:grid lg:grid-cols-2 lg:items-center lg:min-h-0 lg:pb-0">
