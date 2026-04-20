@@ -85,23 +85,23 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background py-20 lg:py-32">
-        <div className="pointer-events-none absolute inset-0 bg-[url('/gambardisdukcapil.jpeg')] bg-cover bg-center opacity-15 saturate-50 brightness-75 blur-md lg:hidden" />
+        <div className="pointer-events-none absolute inset-0 bg-[url('/disdukcapilmobile.jpeg')] bg-cover bg-center opacity-20 saturate-50 brightness-75 blur-md lg:hidden" />
         <div className="pointer-events-none absolute inset-0 bg-slate-950/70 lg:hidden" />
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-slate-950/10 via-slate-950/40 to-slate-950/70 lg:hidden" />
         <div className="container mx-auto px-4 relative z-10">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+          <div className="flex min-h-[70vh] flex-col justify-end pb-10 lg:grid lg:grid-cols-2 lg:items-center lg:min-h-0 lg:pb-0">
             {/* Left Content */}
-            <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+            <div className="w-full rounded-[2rem] border border-white/10 bg-slate-950/20 p-6 shadow-2xl backdrop-blur-xl transition-colors duration-300 lg:bg-transparent lg:border-0 lg:p-0 lg:shadow-none">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary backdrop-blur-sm">
                 <Shield className="h-4 w-4" />
                 LAYANAN PUBLIC DIGITAL
               </div>
-              <h1 className="text-balance text-4xl font-bold tracking-tight lg:text-6xl">
+              <h1 className="text-balance text-4xl font-bold tracking-tight text-white lg:text-black lg:text-6xl">
                 SiJempol
                 <span className="block text-primary">Humanis</span>
               </h1>
-              <p className="mt-6 text-pretty text-lg text-muted-foreground lg:text-xl">
-                Nikmati kemudahan pengurusan dokumen kependudukan secara modern, transparan, dan tepat waktu langsunng dari genggaman Anda.
+              <p className="mt-6 max-w-xl text-base text-slate-100/90 lg:text-muted-foreground lg:text-lg">
+                Nikmati kemudahan pengurusan dokumen kependudukan secara modern, transparan, dan tepat waktu langsung dari genggaman Anda.
               </p>
               <div className="mt-10 flex flex-col items-start justify-start gap-4 sm:flex-row">
                 <Link href="/jadwal">
