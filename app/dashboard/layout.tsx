@@ -56,7 +56,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                   <Menu className="h-5 w-5" />
                 </button>
               </DialogTrigger>
-              <DialogContent className="fixed inset-y-0 left-0 z-50 w-full max-w-xs rounded-none border-r border-border bg-background p-0 shadow-2xl sm:rounded-r-3xl">
+              <DialogContent className="fixed inset-y-0 left-0 z-50 w-full max-w-xs rounded-none border-r border-border bg-background p-0 shadow-2xl translate-x-0 translate-y-0 sm:rounded-r-3xl">
                 <Sidebar />
               </DialogContent>
             </Dialog>
