@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { ArrowRight, Menu, X } from "lucide-react"
+import { ArrowRight, Menu } from "lucide-react"
 
 const navItems = [
   { label: "Layanan", href: "/#layanan" },
@@ -54,30 +54,19 @@ export function SiteHeader() {
             </button>
           </DialogTrigger>
           <DialogContent className="fixed inset-y-0 left-0 z-50 w-full max-w-xs rounded-none border-r border-border bg-background p-6 shadow-2xl translate-x-0 translate-y-0 sm:rounded-r-3xl">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/logosijempol.jpeg"
-                  alt="SiJempol Humanis Logo"
-                  width={32}
-                  height={32}
-                  className="rounded-lg"
-                  priority
-                />
-                <div>
-                  <p className="text-base font-semibold">SiJempol</p>
-                  <p className="text-sm text-muted-foreground">Humanis</p>
-                </div>
+            <div className="flex items-center gap-3">
+              <Image
+                src="/logosijempol.jpeg"
+                alt="SiJempol Humanis Logo"
+                width={32}
+                height={32}
+                className="rounded-lg"
+                priority
+              />
+              <div>
+                <p className="text-base font-semibold">SiJempol</p>
+                <p className="text-sm text-muted-foreground">Humanis</p>
               </div>
-              <DialogClose asChild>
-                <button
-                  type="button"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground transition hover:bg-muted"
-                  aria-label="Tutup menu"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </DialogClose>
             </div>
 
             <div className="mt-6 space-y-2">
