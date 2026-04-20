@@ -2,8 +2,8 @@
 
 import Image from "next/image"
 import Link from "next/link"
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { ArrowRight, Menu } from "lucide-react"
+import { Dialog, DialogClose, DialogContent, DialogTrigger } from "@/components/ui/dialog"
+import { ArrowRight, Menu, X } from "lucide-react"
 
 const navItems = [
   { label: "Layanan", href: "/#layanan" },
@@ -69,28 +69,40 @@ export function SiteHeader() {
                   <p className="text-sm text-muted-foreground">Humanis</p>
                 </div>
               </div>
+              <DialogClose asChild>
+                <button
+                  type="button"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-lg text-foreground transition hover:bg-muted"
+                  aria-label="Tutup menu"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </DialogClose>
             </div>
 
             <div className="mt-6 space-y-2">
               {navItems.map((item) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  className="block rounded-xl px-4 py-3 text-base font-medium text-foreground transition hover:bg-muted"
-                >
-                  {item.label}
-                </Link>
+                <DialogClose asChild key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="block rounded-xl px-4 py-3 text-base font-medium text-foreground transition hover:bg-muted"
+                  >
+                    {item.label}
+                  </Link>
+                </DialogClose>
               ))}
             </div>
 
             <div className="mt-8">
-              <Link
-                href="/#layanan"
-                className="flex items-center justify-between rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
-              >
-                Mulai Sekarang
-                <ArrowRight className="h-4 w-4" />
-              </Link>
+              <DialogClose asChild>
+                <Link
+                  href="/#layanan"
+                  className="flex items-center justify-between rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
+                >
+                  Mulai Sekarang
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </DialogClose>
             </div>
           </DialogContent>
         </Dialog>
