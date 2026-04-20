@@ -96,7 +96,7 @@ export function SiteHeader() {
             <div className="mt-8">
               <DialogClose asChild>
                 <Link
-                  href="/#layanan"
+                  href="/jadwal"
                   className="flex items-center justify-between rounded-xl bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary/90"
                 >
                   Mulai Sekarang
