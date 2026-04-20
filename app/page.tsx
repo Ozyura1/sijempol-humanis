@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { SiteHeader } from "@/components/site/header"
 
 const services = [
   {
@@ -80,39 +81,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/logosijempol.jpeg"
-              alt="SiJempol Humanis Logo"
-              width={40}
-              height={40}
-              className="rounded-lg"
-              priority
-            />
-            <div>
-              <span className="text-lg font-bold">SiJempol</span>
-              <span className="ml-2 text-sm text-muted-foreground">Humanis</span>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-6 md:flex">
-            <Link href="#layanan" className="text-sm font-medium hover:text-primary">
-              Layanan
-            </Link>
-            <Link href="#tentang" className="text-sm font-medium hover:text-primary">
-              Tentang
-            </Link>
-            <Link href="#kontak" className="text-sm font-medium hover:text-primary">
-              Kontak
-            </Link>
-            <Link href="/jadwal" className="text-sm font-medium hover:text-primary">
-              Cek Jadwal
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background py-20 lg:py-32">

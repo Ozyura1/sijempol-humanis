@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { useState } from "react"
 import { useAspirasi } from "@/app/providers/aspirasi-provider"
+import { SiteHeader } from "@/components/site/header"
 
 export default function HubungiKamiPage() {
   const { addAspirasi } = useAspirasi()
@@ -52,32 +53,7 @@ export default function HubungiKamiPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/logosijempol.jpeg"
-              alt="SiJempol Humanis Logo"
-              width={40}
-              height={40}
-              className="rounded-lg"
-              priority
-            />
-            <div>
-              <span className="text-lg font-bold">SiJempol</span>
-              <span className="ml-2 text-sm text-muted-foreground">Humanis</span>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-6 md:flex text-sm">
-            <Link href="/#layanan" className="hover:text-primary">Layanan</Link>
-            <Link href="/#tentang" className="hover:text-primary">Tentang</Link>
-            <Link href="#informasi-kontak" className="hover:text-primary">Kontak</Link>
-            <Link href="/jadwal" className="hover:text-primary">Cek Jadwal</Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Hero Section */}
       <section className="relative bg-gradient-to-r from-primary to-primary/80 py-16 text-white">

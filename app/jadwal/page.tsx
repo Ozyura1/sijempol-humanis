@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { useAgenda } from "@/app/providers/agenda-provider"
 import { useState } from "react"
+import { SiteHeader } from "@/components/site/header"
 
 export default function JadwalPage() {
   const { agendas } = useAgenda()
@@ -56,21 +57,7 @@ export default function JadwalPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-3">
-            <span className="text-lg font-bold">SiJempol</span>
-            <span className="text-sm text-muted-foreground">Humanis</span>
-          </Link>
-
-          <nav className="hidden md:flex items-center gap-6 text-sm">
-            <Link href="/#layanan" className="hover:text-primary">Layanan</Link>
-            <Link href="/#tentang" className="hover:text-primary">Tentang</Link>
-            <Link href="/hubungi-kami" className="hover:text-primary">Kontak</Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       <main className="container mx-auto px-4 py-12">
         {/* Title */}
