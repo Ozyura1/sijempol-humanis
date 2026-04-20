@@ -160,10 +160,10 @@ export default function HomePage() {
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {services.map((service) => (
-              <Card key={service.title} className="group transition-all hover:shadow-lg">
+              <Card key={service.title} className="group cursor-pointer">
                 <CardHeader>
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary">
-                    <service.icon className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 transition-colors duration-300 ease-out group-hover:bg-primary">
+                    <service.icon className="h-6 w-6 text-primary transition-colors duration-300 ease-out group-hover:text-primary-foreground" />
                   </div>
                   <CardTitle className="text-lg">{service.title}</CardTitle>
                   <CardDescription>{service.description}</CardDescription>
