@@ -156,30 +156,7 @@ export default function KartuKeluargaPage() {
             </Card>
 
             {/* CTA */}
-            <Card>
-              <CardContent className="pt-6">
-                <div className="text-center space-y-4">
-                  <h3 className="text-lg font-semibold">Siap Mengajukan Kartu Keluarga?</h3>
-                  <p className="text-muted-foreground">
-                    Mulai pengajuan kartu keluarga baru atau perubahan sekarang atau cek status pengajuan yang sudah diajukan.
-                  </p>
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                    <Link href="/dashboard/kk">
-                      <Button size="lg" className="w-full sm:w-auto">
-                        <FileText className="mr-2 h-4 w-4" />
-                        Mulai Pengajuan
-                      </Button>
-                    </Link>
-                    <Link href="/dashboard/status">
-                      <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                        <CheckCircle2 className="mr-2 h-4 w-4" />
-                        Cek Status
-                      </Button>
-                    </Link>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+
           </div>
         </div>
       </main>
