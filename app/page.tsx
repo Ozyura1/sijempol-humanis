@@ -84,21 +84,24 @@ export default function HomePage() {
       <SiteHeader />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background py-20 lg:py-32">
- <div className="pointer-events-none absolute inset-0 bg-[url('/disdukcapilmobile.jpeg')] bg-cover bg-center opacity-20 saturate-50 brightness-75 lg:hidden" />
+      <section className="relative overflow-hidden bg-background py-20 lg:py-32">
+        <div className="pointer-events-none absolute inset-0 lg:hidden">
+          <div className="absolute inset-0 bg-[length:120%] bg-center bg-no-repeat brightness-95" style={{ backgroundImage: "url('/disdukcapilmobile.jpeg')" }} />
+          <div className="absolute inset-0 bg-slate-950/25" />
+        </div>
         <div className="container mx-auto px-4 relative z-10">
           <div className="flex min-h-[70vh] flex-col justify-end pb-10 lg:grid lg:grid-cols-2 lg:items-center lg:min-h-0 lg:pb-0">
             {/* Left Content */}
-            <div className="w-full rounded-[2rem] border border-white/10 bg-slate-950/20 p-6 shadow-2xl backdrop-blur-xl transition-colors duration-300 lg:bg-transparent lg:border-0 lg:p-0 lg:shadow-none">
+            <div className="w-full rounded-[2rem] border border-slate-200/50 bg-slate-100/85 p-6 shadow-2xl backdrop-blur-xl text-slate-950 transition-colors duration-300 lg:bg-transparent lg:border-0 lg:p-0 lg:shadow-none lg:text-black">
               <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary backdrop-blur-sm">
                 <Shield className="h-4 w-4" />
                 LAYANAN PUBLIC DIGITAL
               </div>
-              <h1 className="text-balance text-4xl font-bold tracking-tight text-white lg:text-black lg:text-6xl">
+              <h1 className="text-balance text-4xl font-bold tracking-tight text-slate-950 lg:text-black lg:text-6xl">
                 SiJempol
                 <span className="block text-primary">Humanis</span>
               </h1>
-              <p className="mt-6 max-w-xl text-base text-slate-100/90 lg:text-muted-foreground lg:text-lg">
+              <p className="mt-6 max-w-xl text-base text-slate-700 lg:text-muted-foreground lg:text-lg">
                 Nikmati kemudahan pengurusan dokumen kependudukan secara modern, transparan, dan tepat waktu langsung dari genggaman Anda.
               </p>
               <div className="mt-10 flex flex-col items-start justify-start gap-4 sm:flex-row">
