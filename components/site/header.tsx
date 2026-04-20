@@ -53,7 +53,7 @@ export function SiteHeader() {
               <Menu className="h-5 w-5" />
             </button>
           </DialogTrigger>
-          <DialogContent className="fixed inset-y-0 left-0 z-50 w-full max-w-xs rounded-none border-r border-border bg-background p-6 shadow-2xl translate-x-0 translate-y-0 sm:rounded-r-3xl">
+          <DialogContent className="fixed inset-y-0 left-0 z-50 w-full max-w-xs rounded-none border-r border-border bg-background p-6 shadow-2xl overflow-y-auto transition-transform duration-300 ease-out transform-gpu translate-x-0 data-[state=open]:translate-x-0 data-[state=closed]:-translate-x-full data-[state=open]:animate-in data-[state=closed]:animate-out sm:rounded-r-3xl">
             <div className="flex items-center gap-3">
               <Image
                 src="/logosijempol.jpeg"
