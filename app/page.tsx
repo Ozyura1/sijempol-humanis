@@ -19,7 +19,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SiteHeader } from "@/components/site/header"
-import bgImage from "@/assets/disdukcapilmobile.jpeg"
 
 const services = [
   {
@@ -87,7 +86,7 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-background py-20 lg:py-32">
         <div className="pointer-events-none absolute inset-0 lg:hidden">
-          <div className="absolute inset-0 bg-[length:120%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/disdukcapilmobile.jpeg')" }} />
+          <div className="absolute inset-0 bg-[length:120%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('app/public/disdukcapilmobile.jpeg')" }} />
           <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/25 to-transparent" />
         </div>
         <div className="container mx-auto px-4 relative z-10">
