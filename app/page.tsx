@@ -85,8 +85,9 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background py-20 lg:py-32">
-        <div className="pointer-events-none absolute inset-0 bg-[url('/gambardisdukcapil.jpeg')] bg-cover bg-center opacity-20 lg:hidden" />
-        <div className="pointer-events-none absolute inset-0 bg-slate-950/40 lg:hidden" />
+        <div className="pointer-events-none absolute inset-0 bg-[url('/gambardisdukcapil.jpeg')] bg-cover bg-center opacity-10 blur-sm lg:hidden" />
+        <div className="pointer-events-none absolute inset-0 bg-slate-950/60 lg:hidden" />
+        <div className="pointer-events-none absolute inset-0 bg-white/20 lg:hidden" />
         <div className="container mx-auto px-4 relative">
           <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
             {/* Left Content */}
