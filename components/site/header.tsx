@@ -3,7 +3,7 @@
 import Image from "next/image"
 import Link from "next/link"
 import { Dialog, DialogClose, DialogContent, DialogTrigger } from "@/components/ui/dialog"
-import { ArrowRight, Menu } from "lucide-react"
+import { ArrowRight, Menu, X } from "lucide-react"
 
 const navItems = [
   { label: "Layanan", href: "/#layanan" },
@@ -53,36 +53,45 @@ export function SiteHeader() {
               <Menu className="h-5 w-5" />
             </button>
           </DialogTrigger>
-          <DialogContent className="fixed inset-y-0 left-0 z-50 w-full max-w-xs rounded-none border-r border-border bg-background p-6 shadow-2xl overflow-y-auto transition-transform duration-300 ease-out transform-gpu translate-x-0 data-[state=open]:translate-x-0 data-[state=closed]:-translate-x-full data-[state=open]:animate-in data-[state=closed]:animate-out sm:rounded-r-3xl">
-            <div className="flex items-center gap-3">
-              <Image
-                src="/logosijempol.jpeg"
-                alt="SiJempol Humanis Logo"
-                width={32}
-                height={32}
-                className="rounded-lg"
-                priority
-              />
-              <div>
-                <p className="text-base font-semibold">SiJempol</p>
-                <p className="text-sm text-muted-foreground">Humanis</p>
+          <DialogContent className="fixed inset-y-0 left-0 z-50 w-full max-w-xs rounded-none border-r border-border bg-background shadow-2xl overflow-y-auto transition-transform duration-300 ease-out transform-gpu translate-x-0 data-[state=open]:translate-x-0 data-[state=closed]:-translate-x-full data-[state=open]:animate-in data-[state=closed]:animate-out sm:rounded-r-3xl flex flex-col">
+            <div className="flex items-center justify-between gap-3 border-b border-border p-6">
+              <div className="flex items-center gap-3">
+                <Image
+                  src="/logosijempol.jpeg"
+                  alt="SiJempol Humanis Logo"
+                  width={32}
+                  height={32}
+                  className="rounded-lg"
+                  priority
+                />
+                <div>
+                  <p className="text-base font-semibold">SiJempol</p>
+                  <p className="text-sm text-muted-foreground">Humanis</p>
+                </div>
               </div>
+              <DialogClose asChild>
+                <button className="rounded-lg p-2 hover:bg-muted">
+                  <X className="h-5 w-5" />
+                </button>
+              </DialogClose>
             </div>
 
-            <div className="mt-6 space-y-2">
-              {navItems.map((item) => (
-                <DialogClose asChild key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="block rounded-xl px-4 py-3 text-base font-medium text-foreground transition hover:bg-muted"
-                  >
-                    {item.label}
-                  </Link>
-                </DialogClose>
-              ))}
-            </div>
+            <nav className="flex-1 overflow-y-auto">
+              <div className="space-y-2 p-6">
+                {navItems.map((item) => (
+                  <DialogClose asChild key={item.href}>
+                    <Link
+                      href={item.href}
+                      className="block rounded-xl px-4 py-3 text-base font-medium text-foreground transition hover:bg-muted"
+                    >
+                      {item.label}
+                    </Link>
+                  </DialogClose>
+                ))}
+              </div>
+            </nav>
 
-            <div className="mt-8">
+            <div className="border-t border-border p-6">
               <DialogClose asChild>
                 <Link
                   href="/jadwal"
