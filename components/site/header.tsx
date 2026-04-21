@@ -9,14 +9,13 @@ const navItems = [
   { label: "Layanan", href: "/#layanan" },
   { label: "Tentang", href: "/#tentang" },
   { label: "Kontak", href: "/hubungi-kami" },
+  { label: "Cek Jadwal", href: "/jadwal" },
 ]
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        
-        {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
           <Image
             src="/logosijempol.jpeg"
@@ -32,7 +31,6 @@ export function SiteHeader() {
           </div>
         </Link>
 
-        {/* Desktop Nav */}
         <nav className="hidden items-center gap-6 md:flex text-sm">
           {navItems.map((item) => (
             <Link
@@ -45,7 +43,6 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {/* Mobile Menu */}
         <Dialog>
           <DialogTrigger asChild>
             <button
@@ -56,43 +53,36 @@ export function SiteHeader() {
               <Menu className="h-5 w-5" />
             </button>
           </DialogTrigger>
-
-          <DialogContent className="fixed inset-y-0 left-0 z-50 w-full max-w-xs rounded-none border-r border-border bg-background p-6 shadow-2xl flex flex-col">
-            
-            {/* TOP SECTION */}
-            <div>
-              <div className="flex items-center gap-3">
-                <Image
-                  src="/logosijempol.jpeg"
-                  alt="SiJempol Humanis Logo"
-                  width={32}
-                  height={32}
-                  className="rounded-lg"
-                  priority
-                />
-                <div>
-                  <p className="text-base font-semibold">SiJempol</p>
-                  <p className="text-sm text-muted-foreground">Humanis</p>
-                </div>
-              </div>
-
-              {/* NAV ITEMS */}
-              <div className="mt-6 space-y-2">
-                {navItems.map((item) => (
-                  <DialogClose asChild key={item.href}>
-                    <Link
-                      href={item.href}
-                      className="block rounded-xl px-4 py-3 text-base font-medium text-foreground transition hover:bg-muted"
-                    >
-                      {item.label}
-                    </Link>
-                  </DialogClose>
-                ))}
+          <DialogContent className="fixed inset-y-0 left-0 z-50 w-full max-w-xs rounded-none border-r border-border bg-background p-6 shadow-2xl overflow-y-auto transition-transform duration-300 ease-out transform-gpu translate-x-0 data-[state=open]:translate-x-0 data-[state=closed]:-translate-x-full data-[state=open]:animate-in data-[state=closed]:animate-out sm:rounded-r-3xl">
+            <div className="flex items-center gap-3">
+              <Image
+                src="/logosijempol.jpeg"
+                alt="SiJempol Humanis Logo"
+                width={32}
+                height={32}
+                className="rounded-lg"
+                priority
+              />
+              <div>
+                <p className="text-base font-semibold">SiJempol</p>
+                <p className="text-sm text-muted-foreground">Humanis</p>
               </div>
             </div>
 
-            {/* BOTTOM CTA */}
-            <div className="mt-auto">
+            <div className="mt-6 space-y-2">
+              {navItems.map((item) => (
+                <DialogClose asChild key={item.href}>
+                  <Link
+                    href={item.href}
+                    className="block rounded-xl px-4 py-3 text-base font-medium text-foreground transition hover:bg-muted"
+                  >
+                    {item.label}
+                  </Link>
+                </DialogClose>
+              ))}
+            </div>
+
+            <div className="mt-8">
               <DialogClose asChild>
                 <Link
                   href="/jadwal"
@@ -103,7 +93,6 @@ export function SiteHeader() {
                 </Link>
               </DialogClose>
             </div>
-
           </DialogContent>
         </Dialog>
       </div>
