@@ -161,7 +161,7 @@ export function Sidebar() {
           )
         )}
 
-        {user?.role === "SUPER_ADMIN" && (
+        {user?.role === "admin" && (
           <>
             <div className="mb-2 mt-6 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
               Administrasi

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next"
 import { Inter, Plus_Jakarta_Sans } from "next/font/google"
 import "./globals.css"
+import { AuthProvider } from "@/contexts/auth-context"
 import { AgendaProvider } from "./providers/agenda-provider"
 import { AspirasiProvider } from "./providers/aspirasi-provider"
 import { PageTransition } from "@/components/site/page-transition"
@@ -35,11 +36,13 @@ export default function RootLayout({
   return (
     <html lang="id" suppressHydrationWarning>
       <body className={`${inter.variable} ${plusJakarta.variable} font-sans antialiased`}>
-        <AgendaProvider>
-          <AspirasiProvider>
-            <PageTransition>{children}</PageTransition>
-          </AspirasiProvider>
-        </AgendaProvider>
+        <AuthProvider>
+          <AgendaProvider>
+            <AspirasiProvider>
+              <PageTransition>{children}</PageTransition>
+            </AspirasiProvider>
+          </AgendaProvider>
+        </AuthProvider>
       </body>
     </html>
   )

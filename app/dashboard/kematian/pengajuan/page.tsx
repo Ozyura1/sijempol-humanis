@@ -122,7 +122,7 @@ const kematianFields = [
     acceptFileTypes: ".pdf,.jpg,.jpeg,.png",
     maxFileSize: 5,
   },
-]
+] as const
 
 export default function KematianPengajuanPage() {
   const { isAuthenticated, user } = useAuth()

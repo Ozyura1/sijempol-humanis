@@ -200,7 +200,7 @@ const ktpFields = [
     acceptFileTypes: ".jpg,.jpeg,.png",
     maxFileSize: 5,
   },
-]
+] as const
 
 export default function KTPPengajuanPage() {
   const { isAuthenticated, user } = useAuth()

@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { Textarea } from "@/components/ui/textarea"
-import { Separator } from "@/components/ui/separator"
 import {
   AlertCircle,
   ArrowLeft,
@@ -399,7 +398,7 @@ export default function AdminSubmissionDetailPage() {
                 </Alert>
               )}
 
-              <Separator className="my-4" />
+              <div className="my-4 border-t"></div>
 
               <div className="text-sm">
                 <p className="font-medium mb-2 text-gray-900">Status Timeline</p>

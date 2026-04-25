@@ -17,7 +17,7 @@ interface FormField {
   type: "text" | "email" | "tel" | "date" | "select" | "textarea" | "file"
   required?: boolean
   placeholder?: string
-  options?: Array<{ label: string; value: string }>
+  options?: readonly any[]
   maxFileSize?: number // in MB
   acceptFileTypes?: string
 }
@@ -25,7 +25,7 @@ interface FormField {
 interface SubmissionFormProps {
   serviceName: string
   serviceTitle: string
-  fields: FormField[]
+  fields: readonly FormField[]
   onSubmit: (data: any) => Promise<{ success: boolean; message?: string; data?: any }>
   submitButtonText?: string
 }

@@ -120,7 +120,7 @@ const kelahiranFields = [
     acceptFileTypes: ".pdf,.jpg,.jpeg,.png",
     maxFileSize: 5,
   },
-]
+] as const
 
 export default function KelahiranPengajuanPage() {
   const { isAuthenticated, user } = useAuth()

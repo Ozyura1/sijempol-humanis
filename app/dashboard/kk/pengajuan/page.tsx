@@ -94,7 +94,7 @@ const kkFields = [
     acceptFileTypes: ".pdf,.jpg,.jpeg,.png",
     maxFileSize: 5,
   },
-]
+] as const
 
 export default function KkPengajuanPage() {
   const { isAuthenticated, user } = useAuth()

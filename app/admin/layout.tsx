@@ -81,16 +81,11 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex h-screen bg-background">
-      <Sidebar
-        user={adminUser}
-        userRole="admin"
-        onLogout={handleLogout}
-      />
+      <Sidebar />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header
-          user={adminUser}
-          userRole="admin"
-          onLogout={handleLogout}
+          title="Admin Dashboard"
+          description="Kelola pengajuan layanan dari masyarakat"
         />
         <main className="flex-1 overflow-auto">
           {children}

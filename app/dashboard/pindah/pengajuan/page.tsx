@@ -142,7 +142,7 @@ const pindahFields = [
     acceptFileTypes: ".pdf,.jpg,.jpeg,.png",
     maxFileSize: 5,
   },
-]
+] as const
 
 export default function PindahPengajuanPage() {
   const { isAuthenticated, user } = useAuth()

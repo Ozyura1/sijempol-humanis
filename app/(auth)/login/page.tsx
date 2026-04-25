@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,22 +14,15 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
-  const [successMessage, setSuccessMessage] = useState("")
   const router = useRouter()
-  const searchParams = useSearchParams()
   const { login, isAuthenticated, user } = useAuth()
 
   useEffect(() => {
-    // Check if just registered
-    if (searchParams.get("registered")) {
-      setSuccessMessage("Akun berhasil dibuat! Silakan masuk dengan username dan password Anda.")
-    }
-
     // If already authenticated and is user, redirect to dashboard
     if (isAuthenticated && user?.role === "user") {
       router.push("/dashboard")
     }
-  }, [isAuthenticated, user, router, searchParams])
+  }, [isAuthenticated, user, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,12 +56,6 @@ export default function LoginPage() {
             {error && (
               <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">
                 {error}
-              </div>
-            )}
-
-            {successMessage && (
-              <div className="p-3 bg-green-50 text-green-700 rounded-md text-sm">
-                {successMessage}
               </div>
             )}
 
