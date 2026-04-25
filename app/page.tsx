@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import {
@@ -15,10 +16,15 @@ import {
   Phone,
   Mail,
   MapPin,
+  X,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { SiteHeader } from "@/components/site/header"
+import { UserLoginForm } from "@/components/auth/user-login-form"
+import { RegisterForm } from "@/components/auth/register-form"
+import { AuthModalWrapper } from "@/components/auth/auth-modal-wrapper"
 
 const services = [
   {
@@ -83,6 +89,11 @@ export default function HomePage() {
       {/* Header */}
       <SiteHeader />
 
+      {/* Auth Modal with Suspense */}
+      <Suspense fallback={null}>
+        <AuthModalWrapper />
+      </Suspense>
+
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-background py-20 lg:py-32">
         <div className="pointer-events-none absolute inset-0 lg:hidden">
@@ -105,20 +116,32 @@ export default function HomePage() {
                 Nikmati kemudahan pengurusan dokumen kependudukan secara modern, transparan, dan tepat waktu langsung dari genggaman Anda.
               </p>
               <div className="mt-10 flex flex-col items-start justify-start gap-4 sm:flex-row">
-                <Link href="/auth/login">
-                  <Button size="lg" className="gap-2">
-                    Mulai Sekarang
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
+                <Button 
+                  size="lg" 
+                  className="gap-2" 
+                  onClick={() => {
+                    // Use window.history to set URL without reload
+                    window.history.pushState(null, '', '/?login=true')
+                    window.location.reload()
+                  }}
+                >
+                  Mulai Sekarang
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </div>
               <div className="mt-10 flex flex-col items-start justify-start gap-4 sm:flex-row">
-                <Link href="/auth/register">
-                  <Button size="lg" className="gap-2">
-                    Belum Punya Akun? Daftar Sekarang
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                </Link>
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="gap-2" 
+                  onClick={() => {
+                    window.history.pushState(null, '', '/?register=true')
+                    window.location.reload()
+                  }}
+                >
+                  Belum Punya Akun? Daftar Sekarang
+                  <ArrowRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
 
