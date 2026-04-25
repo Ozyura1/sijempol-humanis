@@ -3,6 +3,7 @@ import { Inter, Plus_Jakarta_Sans } from "next/font/google"
 import "./globals.css"
 import { AgendaProvider } from "./providers/agenda-provider"
 import { AspirasiProvider } from "./providers/aspirasi-provider"
+import { PageTransition } from "@/components/site/page-transition"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -36,7 +37,7 @@ export default function RootLayout({
       <body className={`${inter.variable} ${plusJakarta.variable} font-sans antialiased`}>
         <AgendaProvider>
           <AspirasiProvider>
-            {children}
+            <PageTransition>{children}</PageTransition>
           </AspirasiProvider>
         </AgendaProvider>
       </body>

@@ -18,6 +18,7 @@ import {
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { SiteHeader } from "@/components/site/header"
 
 const services = [
   {
@@ -80,59 +81,31 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="flex items-center gap-3">
-            <Image
-              src="/logosijempol.jpeg"
-              alt="SiJempol Humanis Logo"
-              width={40}
-              height={40}
-              className="rounded-lg"
-              priority
-            />
-            <div>
-              <span className="text-lg font-bold">SiJempol</span>
-              <span className="ml-2 text-sm text-muted-foreground">Humanis</span>
-            </div>
-          </Link>
-
-          <nav className="hidden items-center gap-6 md:flex">
-            <Link href="#layanan" className="text-sm font-medium hover:text-primary">
-              Layanan
-            </Link>
-            <Link href="#tentang" className="text-sm font-medium hover:text-primary">
-              Tentang
-            </Link>
-            <Link href="#kontak" className="text-sm font-medium hover:text-primary">
-              Kontak
-            </Link>
-            <Link href="/jadwal" className="text-sm font-medium hover:text-primary">
-              Cek Jadwal
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-primary/5 to-background py-20 lg:py-32">
-        <div className="container mx-auto px-4">
-          <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+      <section className="relative overflow-hidden bg-background py-20 lg:py-32">
+        <div className="pointer-events-none absolute inset-0 lg:hidden">
+          <div className="absolute inset-0 bg-[length:120%] bg-cover bg-center bg-no-repeat" style={{ backgroundImage: "url('/disdukcapilmobile.jpeg')" }} />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-950/25 to-transparent" />
+        </div>
+        <div className="container mx-auto px-4 relative z-10">
+          <div className="flex min-h-[70vh] flex-col justify-end pb-10 lg:grid lg:grid-cols-2 lg:items-center lg:min-h-0 lg:pb-0">
             {/* Left Content */}
-            <div>
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary">
+            <div className="w-full rounded-[2rem] border border-white/15 bg-white/10 p-6 shadow-2xl backdrop-blur-xl text-white transition-colors duration-300 lg:bg-transparent lg:border-0 lg:p-0 lg:shadow-none lg:text-black">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary backdrop-blur-sm">
                 <Shield className="h-4 w-4" />
                 LAYANAN PUBLIC DIGITAL
               </div>
-              <h1 className="text-balance text-4xl font-bold tracking-tight lg:text-6xl">
+              <h1 className="text-balance text-4xl font-bold tracking-tight text-white lg:text-black lg:text-6xl">
                 SiJempol
                 <span className="block text-primary">Humanis</span>
               </h1>
-              <p className="mt-6 text-pretty text-lg text-muted-foreground lg:text-xl">
-                Nikmati kemudahan pengurusan dokumen kependudukan secara modern, transparan, dan tepat waktu langsunng dari genggaman Anda.
+              <p className="mt-6 max-w-xl text-base text-slate-200/90 lg:text-muted-foreground lg:text-lg">
+                Nikmati kemudahan pengurusan dokumen kependudukan secara modern, transparan, dan tepat waktu langsung dari genggaman Anda.
               </p>
               <div className="mt-10 flex flex-col items-start justify-start gap-4 sm:flex-row">
-                <Link href="#layanan">
+                <Link href="/jadwal">
                   <Button size="lg" className="gap-2">
                     Mulai Sekarang
                     <ArrowRight className="h-4 w-4" />
@@ -191,10 +164,10 @@ export default function HomePage() {
 
           <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {services.map((service) => (
-              <Card key={service.title} className="group transition-all hover:shadow-lg">
+              <Card key={service.title} className="group cursor-pointer">
                 <CardHeader>
-                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary">
-                    <service.icon className="h-6 w-6 text-primary transition-colors group-hover:text-primary-foreground" />
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 transition-colors duration-300 ease-out group-hover:bg-primary">
+                    <service.icon className="h-6 w-6 text-primary transition-colors duration-300 ease-out group-hover:text-primary-foreground" />
                   </div>
                   <CardTitle className="text-lg">{service.title}</CardTitle>
                   <CardDescription>{service.description}</CardDescription>
