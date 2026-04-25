@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog"
 import { Menu, Shield } from "lucide-react"
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isLoading } = useAuth()
+  const { isAuthenticated, isLoading, user } = useAuth()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
 
@@ -18,10 +18,15 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   }, [])
 
   useEffect(() => {
-    if (mounted && !isLoading && !isAuthenticated) {
-      router.push("/login")
+    if (mounted && !isLoading) {
+      if (!isAuthenticated) {
+        router.push("/login")
+      } else if (user?.role === "admin") {
+        // Admins should not access user dashboard
+        router.push("/admin/dashboard")
+      }
     }
-  }, [mounted, isLoading, isAuthenticated, router])
+  }, [mounted, isLoading, isAuthenticated, user?.role, router])
 
   if (!mounted || isLoading) {
     return (
@@ -34,7 +39,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
     )
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || user?.role !== "user") {
     return null
   }
 

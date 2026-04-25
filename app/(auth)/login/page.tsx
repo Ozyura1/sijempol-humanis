@@ -1,29 +1,35 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
+import { useAuth } from "@/contexts/auth-context"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
-
-export default function AdminLoginPage() {
+export default function LoginPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
+  const [successMessage, setSuccessMessage] = useState("")
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const { login, isAuthenticated, user } = useAuth()
 
-  // Check if admin is already logged in
   useEffect(() => {
-    const adminAuth = localStorage.getItem("admin_access_token")
-    if (adminAuth) {
-      router.push("/admin/dashboard")
+    // Check if just registered
+    if (searchParams.get("registered")) {
+      setSuccessMessage("Akun berhasil dibuat! Silakan masuk dengan username dan password Anda.")
     }
-  }, [router])
+
+    // If already authenticated and is user, redirect to dashboard
+    if (isAuthenticated && user?.role === "user") {
+      router.push("/dashboard")
+    }
+  }, [isAuthenticated, user, router, searchParams])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -34,62 +40,35 @@ export default function AdminLoginPage() {
       return
     }
 
-    setLoading(true)
+    const result = await login(username, password)
 
-    try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.message || "Login gagal")
-        return
-      }
-
-      const { user, access_token, refresh_token } = data
-
-      // Verify user has admin role
-      if (user.role !== "admin") {
-        setError("Akun ini tidak memiliki akses admin")
-        return
-      }
-
-      // Store admin tokens in localStorage
-      localStorage.setItem("admin_access_token", access_token)
-      if (refresh_token) {
-        localStorage.setItem("admin_refresh_token", refresh_token)
-      }
-      localStorage.setItem("admin_user", JSON.stringify(user))
-
-      router.push("/admin/dashboard")
-    } catch (err) {
-      setError("Koneksi gagal. Silakan coba lagi.")
-    } finally {
-      setLoading(false)
+    if (!result.success) {
+      setError(result.message || "Login gagal")
+      return
     }
+
+    // Login will update context, redirect handled by useEffect
+    router.push("/dashboard")
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary/5 to-background p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-2xl">Admin SiJempol</CardTitle>
-          <CardDescription>Masuk ke dashboard administrasi</CardDescription>
+          <CardTitle className="text-2xl">Masuk SiJempol</CardTitle>
+          <CardDescription>Masuk untuk mengajukan layanan administrasi</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             {error && (
               <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">
                 {error}
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="p-3 bg-green-50 text-green-700 rounded-md text-sm">
+                {successMessage}
               </div>
             )}
 
@@ -100,7 +79,7 @@ export default function AdminLoginPage() {
               <Input
                 id="username"
                 type="text"
-                placeholder="Username admin"
+                placeholder="Username Anda"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 disabled={loading}
@@ -132,21 +111,22 @@ export default function AdminLoginPage() {
               )}
             </Button>
 
-            <div className="pt-4 border-t text-center">
-              <div className="text-sm text-muted-foreground mb-3">
-                <p>
-                  Bukan admin?{" "}
-                  <Link href="/login" className="text-primary hover:underline font-medium">
-                    Login sebagai user
-                  </Link>
-                </p>
-              </div>
+            <div className="text-center text-sm">
+              Belum punya akun?{" "}
+              <Link href="/register" className="text-primary hover:underline font-medium">
+                Daftar di sini
+              </Link>
             </div>
 
-            <div className="pt-4 border-t text-center text-xs text-muted-foreground bg-blue-50 p-3 rounded">
-              <p className="font-semibold mb-2">Default Admin Credentials:</p>
-              <p>Username: admin</p>
-              <p>Password: admin123</p>
+            <div className="pt-4 border-t">
+              <div className="text-center text-sm text-muted-foreground mb-2">
+                <strong>Login Sebagai Admin?</strong>
+              </div>
+              <Link href="/admin/login">
+                <Button variant="outline" className="w-full">
+                  Login Admin
+                </Button>
+              </Link>
             </div>
           </form>
         </CardContent>

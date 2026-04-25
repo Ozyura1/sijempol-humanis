@@ -1,6 +1,7 @@
 import express from "express"
 import db, { nextId } from "../db.js"
 import { authenticate } from "./authMiddleware.js"
+import { requireRole } from "../middleware/roleGuard.js"
 
 const allowedResources = [
   "id_cards",
@@ -11,6 +12,16 @@ const allowedResources = [
   "family_cards",
 ]
 
+// Valid status progression
+const STATUS_WORKFLOW = {
+  pending: ["verifying", "deleted"],
+  verifying: ["approved", "rejected"],
+  approved: ["completed"],
+  rejected: ["pending"],
+  completed: [],
+  deleted: [],
+}
+
 function createResourceRouter(collectionName) {
   if (!allowedResources.includes(collectionName)) {
     throw new Error(`Resource '${collectionName}' tidak didukung.`)
@@ -19,14 +30,29 @@ function createResourceRouter(collectionName) {
   const router = express.Router()
   router.use(authenticate)
 
+  // GET list - Users see only own, Admins see all
   router.get("/", async (req, res) => {
     await db.read()
-    const list = [...db.data[collectionName]].sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
+    let list = db.data[collectionName] || []
+    
+    // Filter by user if role is 'user'
+    if (req.user.role === "user") {
+      list = list.filter((item) => item.user_id === req.user.id)
+    }
+    
+    // Filter by status if query param provided
+    if (req.query.status) {
+      list = list.filter((item) => item.status === req.query.status)
+    }
+    
+    // Sort by created_at descending
+    list = list.sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
     res.json(list)
   })
 
-  router.post("/", async (req, res) => {
-    const { applicant_name, status, data } = req.body
+  // POST create - Only users can submit
+  router.post("/", requireRole("user"), async (req, res) => {
+    const { applicant_name, data, documents } = req.body
     if (!applicant_name) {
       return res.status(400).json({ message: "applicant_name wajib diisi." })
     }
@@ -34,47 +60,148 @@ function createResourceRouter(collectionName) {
     await db.read()
     const item = {
       id: nextId(collectionName),
+      user_id: req.user.id,
       applicant_name,
-      status: status || "pending",
+      status: "pending",
       data: data || {},
+      documents: documents || {},
+      reviewed_by: null,
+      rejection_reason: null,
       created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
     }
     db.data[collectionName].push(item)
     await db.write()
     res.status(201).json(item)
   })
 
+  // GET single - Users can see own, Admins can see all
   router.get("/:id", async (req, res) => {
     await db.read()
     const item = db.data[collectionName].find((record) => record.id === Number(req.params.id))
     if (!item) return res.status(404).json({ message: "Data tidak ditemukan." })
+    
+    // Check authorization
+    if (req.user.role === "user" && item.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Forbidden: tidak bisa mengakses submission orang lain" })
+    }
+    
     res.json(item)
   })
 
-  router.put("/:id", async (req, res) => {
-    const { applicant_name, status, data } = req.body
+  // PUT update own submission - Only users, only pending status
+  router.put("/:id", requireRole("user"), async (req, res) => {
+    const { applicant_name, data, documents } = req.body
     await db.read()
     const index = db.data[collectionName].findIndex((record) => record.id === Number(req.params.id))
     if (index === -1) return res.status(404).json({ message: "Data tidak ditemukan." })
 
     const existing = db.data[collectionName][index]
+    
+    // Check authorization
+    if (existing.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Forbidden: tidak bisa mengubah submission orang lain" })
+    }
+    
+    // Only allow update if status is pending
+    if (existing.status !== "pending") {
+      return res.status(400).json({ message: "Hanya submission dengan status pending yang bisa diubah" })
+    }
+
     db.data[collectionName][index] = {
       ...existing,
       applicant_name: applicant_name ?? existing.applicant_name,
-      status: status ?? existing.status,
       data: data ?? existing.data,
+      documents: documents ?? existing.documents,
+      updated_at: new Date().toISOString(),
     }
     await db.write()
     res.json(db.data[collectionName][index])
   })
 
-  router.delete("/:id", async (req, res) => {
+  // DELETE soft delete - Users can delete own if pending
+  router.delete("/:id", requireRole("user"), async (req, res) => {
     await db.read()
-    const initialLength = db.data[collectionName].length
-    db.data[collectionName] = db.data[collectionName].filter((record) => record.id !== Number(req.params.id))
-    if (db.data[collectionName].length === initialLength) return res.status(404).json({ message: "Data tidak ditemukan." })
+    const index = db.data[collectionName].findIndex((record) => record.id === Number(req.params.id))
+    if (index === -1) return res.status(404).json({ message: "Data tidak ditemukan." })
+
+    const existing = db.data[collectionName][index]
+    
+    // Check authorization
+    if (existing.user_id !== req.user.id) {
+      return res.status(403).json({ message: "Forbidden: tidak bisa menghapus submission orang lain" })
+    }
+    
+    // Only allow delete if status is pending
+    if (existing.status !== "pending") {
+      return res.status(400).json({ message: "Hanya submission dengan status pending yang bisa dihapus" })
+    }
+
+    db.data[collectionName][index].status = "deleted"
+    db.data[collectionName][index].updated_at = new Date().toISOString()
     await db.write()
-    res.json({ message: "Item dihapus." })
+    res.json({ message: "Submission dihapus." })
+  })
+
+  // PUT status transition - Only admins
+  router.put("/:id/status", requireRole("admin"), async (req, res) => {
+    const { new_status } = req.body
+    if (!new_status) {
+      return res.status(400).json({ message: "new_status wajib diisi" })
+    }
+
+    await db.read()
+    const index = db.data[collectionName].findIndex((record) => record.id === Number(req.params.id))
+    if (index === -1) return res.status(404).json({ message: "Data tidak ditemukan." })
+
+    const existing = db.data[collectionName][index]
+    const currentStatus = existing.status
+
+    // Validate status transition
+    const allowedTransitions = STATUS_WORKFLOW[currentStatus] || []
+    if (!allowedTransitions.includes(new_status)) {
+      return res.status(400).json({
+        message: `Transition dari '${currentStatus}' ke '${new_status}' tidak diizinkan. Allowed: ${allowedTransitions.join(", ")}`,
+      })
+    }
+
+    db.data[collectionName][index] = {
+      ...existing,
+      status: new_status,
+      reviewed_by: req.user.id,
+      updated_at: new Date().toISOString(),
+    }
+    await db.write()
+    res.json(db.data[collectionName][index])
+  })
+
+  // PUT reject submission - Only admins
+  router.put("/:id/reject", requireRole("admin"), async (req, res) => {
+    const { rejection_reason } = req.body
+    if (!rejection_reason) {
+      return res.status(400).json({ message: "rejection_reason wajib diisi" })
+    }
+
+    await db.read()
+    const index = db.data[collectionName].findIndex((record) => record.id === Number(req.params.id))
+    if (index === -1) return res.status(404).json({ message: "Data tidak ditemukan." })
+
+    const existing = db.data[collectionName][index]
+    
+    // Can only reject from verifying status
+    if (existing.status !== "verifying") {
+      return res.status(400).json({ message: "Hanya submission dengan status 'verifying' yang bisa di-reject" })
+    }
+
+    db.data[collectionName][index] = {
+      ...existing,
+      status: "rejected",
+      rejection_reason,
+      reviewed_by: req.user.id,
+      updated_at: new Date().toISOString(),
+    }
+    await db.write()
+    res.json(db.data[collectionName][index])
   })
 
   return router
