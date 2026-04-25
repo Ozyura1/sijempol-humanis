@@ -11,7 +11,7 @@ import { AlertCircle, LogOut, Eye, TrendingUp, Clock, CheckCircle, XCircle } fro
 import { getStatusBadgeColor, getStatusLabel, getServiceLabel, formatDate, getServiceApiEndpoint } from "@/lib/submission-utils"
 import { calculateAdminStats } from "@/lib/admin-utils"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.sijempolhumanis.web.id/api"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function AdminDashboardPage() {
   const router = useRouter()

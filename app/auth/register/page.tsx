@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://api.sijempolhumanis.web.id/api"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({

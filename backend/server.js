@@ -38,6 +38,22 @@ app.use("/api/family-cards", resourceRoutes("family_cards"))
 async function seedAdminUser() {
   await db.read()
   
+  // Ensure db.data is initialized
+  if (!db.data) {
+    db.data = {
+      users: [],
+      agendas: [],
+      aspirasis: [],
+      addresses: [],
+      id_cards: [],
+      births: [],
+      deaths: [],
+      marriages: [],
+      moves: [],
+      family_cards: [],
+    }
+  }
+  
   const adminEmail = "admin@disdukcapil.go.id"
   const adminUsername = "admin"
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123"

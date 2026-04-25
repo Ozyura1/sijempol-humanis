@@ -1,0 +1,31 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password": "$2a$10$m8KWavcLB800TebgQEsaqen.oBDUZnXYqYuIfkOtFOfZCZYkdSjTC",
+      "name": "Admin Disdukcapil",
+      "email": "admin@disdukcapil.go.id",
+      "role": "admin",
+      "created_at": "2026-04-25T17:45:16.569Z"
+    },
+    {
+      "id": 2,
+      "username": "testuser123",
+      "password": "$2a$10$HR2DpBizI4VPw67EmO.lSOB3mRtbKWKdflqNV97r5cgvZVbQ4VpMC",
+      "name": "Test User",
+      "email": "testuser@email.com",
+      "role": "user",
+      "created_at": "2026-04-25T17:48:17.764Z"
+    }
+  ],
+  "agendas": [],
+  "aspirasis": [],
+  "addresses": [],
+  "id_cards": [],
+  "births": [],
+  "deaths": [],
+  "marriages": [],
+  "moves": [],
+  "family_cards": []
+}

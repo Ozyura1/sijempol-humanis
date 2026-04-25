@@ -75,7 +75,8 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
       }
 
       onSuccess?.()
-      router.push("/dashboard/login?registered=true")
+      // Redirect to login modal
+      router.push("/?login=true")
     } catch (err: any) {
       setError(err.message || "Terjadi kesalahan saat mendaftar")
       setLoading(false)
