@@ -112,6 +112,14 @@ export default function HomePage() {
                   </Button>
                 </Link>
               </div>
+              <div className="mt-10 flex flex-col items-start justify-start gap-4 sm:flex-row">
+                <Link href="/login">
+                  <Button size="lg" className="gap-2">
+                    Belum Punya Akun? Daftar Sekarang
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </div>
 
             {/* Right Image */}
