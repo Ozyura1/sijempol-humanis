@@ -37,7 +37,7 @@ app.use("/api/family-cards", resourceRoutes("family_cards"))
 // Seed admin user on startup
 async function seedAdminUser() {
   await db.read()
-  
+
   // Ensure db.data is initialized
   if (!db.data) {
     db.data = {
@@ -53,13 +53,13 @@ async function seedAdminUser() {
       family_cards: [],
     }
   }
-  
+
   const adminEmail = "admin@disdukcapil.go.id"
   const adminUsername = "admin"
   const adminPassword = process.env.ADMIN_PASSWORD || "admin123"
-  
+
   const existingAdmin = db.data.users.find((user) => user.username === adminUsername || user.email === adminEmail)
-  
+
   if (!existingAdmin) {
     const hashedPassword = bcrypt.hashSync(adminPassword, 10)
     const admin = {
