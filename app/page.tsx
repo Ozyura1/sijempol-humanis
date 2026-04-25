@@ -105,7 +105,7 @@ export default function HomePage() {
                 Nikmati kemudahan pengurusan dokumen kependudukan secara modern, transparan, dan tepat waktu langsung dari genggaman Anda.
               </p>
               <div className="mt-10 flex flex-col items-start justify-start gap-4 sm:flex-row">
-                <Link href="/jadwal">
+                <Link href="/login">
                   <Button size="lg" className="gap-2">
                     Mulai Sekarang
                     <ArrowRight className="h-4 w-4" />
@@ -113,7 +113,7 @@ export default function HomePage() {
                 </Link>
               </div>
               <div className="mt-10 flex flex-col items-start justify-start gap-4 sm:flex-row">
-                <Link href="/login">
+                <Link href="/register">
                   <Button size="lg" className="gap-2">
                     Belum Punya Akun? Daftar Sekarang
                     <ArrowRight className="h-4 w-4" />
