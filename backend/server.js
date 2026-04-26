@@ -8,6 +8,7 @@ import agendaRoutes from "./routes/agendas.js"
 import aspirasiRoutes from "./routes/aspirasis.js"
 import resourceRoutes from "./routes/resources.js"
 import addressRoutes from "./routes/addresses.js"
+import adminDatabaseRoutes from "./routes/adminDatabase.js"
 import db, { nextId } from "./db.js"
 
 dotenv.config()
@@ -49,6 +50,7 @@ app.use("/api/auth", authRoutes)
 app.use("/api/agendas", agendaRoutes)
 app.use("/api/aspirasis", aspirasiRoutes)
 app.use("/api/addresses", addressRoutes)
+app.use("/api/admin/database", adminDatabaseRoutes)
 app.use("/api/id-cards", resourceRoutes("id_cards"))
 app.use("/api/births", resourceRoutes("births"))
 app.use("/api/deaths", resourceRoutes("deaths"))

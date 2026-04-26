@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, LogOut, Eye, TrendingUp, Clock, CheckCircle, XCircle } from "lucide-react"
+import { AlertCircle, LogOut, Eye, TrendingUp, Clock, CheckCircle, XCircle, Database, ClipboardList } from "lucide-react"
 import { getStatusBadgeColor, getStatusLabel, getServiceLabel, formatDate, getServiceApiEndpoint } from "@/lib/submission-utils"
 import { calculateAdminStats } from "@/lib/admin-utils"
 import { useAuth } from "@/contexts/auth-context"
@@ -171,11 +171,17 @@ export default function AdminDashboardPage() {
         )}
 
         {/* Action Buttons */}
-        <div className="mb-8">
+        <div className="mb-8 flex flex-wrap gap-3">
           <Button asChild size="lg" className="gap-2">
             <Link href="/admin/submissions">
-              <Eye className="h-4 w-4" />
+              <ClipboardList className="h-4 w-4" />
               Lihat Semua Pengajuan
+            </Link>
+          </Button>
+          <Button asChild variant="outline" size="lg" className="gap-2">
+            <Link href="/admin/database">
+              <Database className="h-4 w-4" />
+              Lihat Database
             </Link>
           </Button>
         </div>

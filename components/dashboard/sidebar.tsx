@@ -15,6 +15,8 @@ import {
   Baby,
   MapPinned,
   Home,
+  Database,
+  ClipboardList,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/auth-context"
@@ -65,6 +67,24 @@ const navigation = [
     name: "Profil",
     href: "/dashboard/profile",
     icon: Shield,
+  },
+]
+
+const adminNavigation = [
+  {
+    name: "Dashboard Admin",
+    href: "/admin/dashboard",
+    icon: LayoutDashboard,
+  },
+  {
+    name: "Semua Pengajuan",
+    href: "/admin/submissions",
+    icon: ClipboardList,
+  },
+  {
+    name: "Tabel Database",
+    href: "/admin/database",
+    icon: Database,
   },
 ]
 
@@ -185,6 +205,29 @@ export function Sidebar() {
           <Home className="h-5 w-5" />
           Kartu Keluarga
         </Link>
+
+        {user?.role === "admin" && (
+          <>
+            <div className="mb-2 mt-6 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+              Admin
+            </div>
+            {adminNavigation.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                  pathname === item.href
+                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                    : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                {item.name}
+              </Link>
+            ))}
+          </>
+        )}
       </nav>
 
       {/* User Section */}
