@@ -115,13 +115,13 @@ export default function KematianPage() {
         {/* Action Bar */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="flex gap-2">
-            <div className="flex-1 md:flex-initial">
+            <div className="flex-1 md:flex-initial relative">
+              <Search className="h-4 w-4 text-gray-400 absolute left-3 top-3" />
               <Input
                 placeholder="Cari nama atau nomor referensi..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-                prefix={<Search className="h-4 w-4 text-gray-400" />}
+                className="w-full pl-10"
               />
             </div>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
