@@ -26,12 +26,12 @@ export default function PrivacyPage() {
                         </div>
                     </Link>
 
-                    <Link href="/">
-                        <Button variant="ghost" className="gap-2">
+                    <Button asChild variant="ghost" className="gap-2">
+                        <Link href="/">
                             <ArrowLeft className="h-4 w-4" />
                             Kembali
-                        </Button>
-                    </Link>
+                        </Link>
+                    </Button>
                 </div>
             </header>
 
@@ -187,7 +187,7 @@ export default function PrivacyPage() {
                                 Email: <a href="mailto:info@disdukcapiltegal.org" className="text-primary hover:underline">info@disdukcapiltegal.org</a>
                             </p>
                             <p>
-                                Telepon: <a href="0283343262" className="text-primary hover:underline">0283343262</a>
+                                Telepon: <a href="tel:0283343262" className="text-primary hover:underline">0283343262</a>
                             </p>
                             <p>
                                 Jam Operasional: Senin - Jumat, 08:00 - 16:00 WIB

@@ -157,8 +157,8 @@ export default function FAQPage() {
                     </div>
                   </div>
                 </div>
-                <Button className="w-full" size="sm">
-                  <Link href="/hubungi-kami" className="flex items-center gap-2">
+                <Button asChild className="w-full" size="sm">
+                  <Link href="/hubungi-kami">
                     <MessageCircle className="h-4 w-4" />
                     Hubungi Kami
                   </Link>
@@ -172,26 +172,18 @@ export default function FAQPage() {
                 <CardTitle>Tautan Cepat</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
-                <Link href="/jadwal" className="block">
-                  <Button variant="ghost" className="w-full justify-start">
-                    📅 Cek Jadwal Layanan
-                  </Button>
-                </Link>
-                <Link href="/layanan/ktp" className="block">
-                  <Button variant="ghost" className="w-full justify-start">
-                    🆔 Ajukan KTP Elektronik
-                  </Button>
-                </Link>
-                <Link href="/layanan/kelahiran" className="block">
-                  <Button variant="ghost" className="w-full justify-start">
-                    👶 Ajukan Akta Kelahiran
-                  </Button>
-                </Link>
-                <Link href="/hubungi-kami" className="block">
-                  <Button variant="ghost" className="w-full justify-start">
-                    💬 Kirim Aspirasi
-                  </Button>
-                </Link>
+                <Button asChild variant="ghost" className="w-full justify-start">
+                  <Link href="/jadwal">Cek Jadwal Layanan</Link>
+                </Button>
+                <Button asChild variant="ghost" className="w-full justify-start">
+                  <Link href="/layanan/ktp">Ajukan KTP Elektronik</Link>
+                </Button>
+                <Button asChild variant="ghost" className="w-full justify-start">
+                  <Link href="/layanan/kelahiran">Ajukan Akta Kelahiran</Link>
+                </Button>
+                <Button asChild variant="ghost" className="w-full justify-start">
+                  <Link href="/hubungi-kami">Kirim Aspirasi</Link>
+                </Button>
               </CardContent>
             </Card>
 

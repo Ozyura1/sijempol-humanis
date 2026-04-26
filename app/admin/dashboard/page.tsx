@@ -172,12 +172,12 @@ export default function AdminDashboardPage() {
 
         {/* Action Buttons */}
         <div className="mb-8">
-          <Link href="/admin/submissions">
-            <Button size="lg" className="gap-2">
+          <Button asChild size="lg" className="gap-2">
+            <Link href="/admin/submissions">
               <Eye className="h-4 w-4" />
               Lihat Semua Pengajuan
-            </Button>
-          </Link>
+            </Link>
+          </Button>
         </div>
 
         {/* Recent Submissions */}

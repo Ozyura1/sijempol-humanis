@@ -1,137 +1,158 @@
 "use client"
 
+import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Header } from "@/components/dashboard/header"
 import { StatsCard } from "@/components/dashboard/stats-card"
 import { RecentActivity } from "@/components/dashboard/recent-activity"
 import { QuickActions } from "@/components/dashboard/quick-actions"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { AlertCircle, CheckCircle2, Clock, FileCheck, Inbox, ShieldCheck } from "lucide-react"
 import {
-  Users,
-  CreditCard,
-  Heart,
-  FileCheck,
-  Clock,
-  CheckCircle2,
-  AlertTriangle,
-} from "lucide-react"
-import {
-  AreaChart,
-  Area,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart,
-  Bar,
 } from "recharts"
+import { useAuth } from "@/contexts/auth-context"
+import {
+  createStatusCounts,
+  dashboardServices,
+  fetchUserSubmissions,
+  type DashboardSubmission,
+} from "@/lib/dashboard-data"
 
-const monthlyData = [
-  { month: "Jan", ktp: 145, perkawinan: 32, kelahiran: 78 },
-  { month: "Feb", ktp: 132, perkawinan: 28, kelahiran: 65 },
-  { month: "Mar", ktp: 178, perkawinan: 41, kelahiran: 92 },
-  { month: "Apr", ktp: 156, perkawinan: 35, kelahiran: 84 },
-  { month: "Mei", ktp: 189, perkawinan: 45, kelahiran: 98 },
-  { month: "Jun", ktp: 201, perkawinan: 52, kelahiran: 105 },
-]
-
-const statusData = [
-  { name: "Menunggu", value: 45, fill: "hsl(var(--warning))" },
-  { name: "Diproses", value: 78, fill: "hsl(var(--primary))" },
-  { name: "Selesai", value: 234, fill: "hsl(var(--success))" },
-  { name: "Ditolak", value: 12, fill: "hsl(var(--destructive))" },
+const chartColors = [
+  "hsl(var(--primary))",
+  "hsl(var(--success))",
+  "hsl(var(--warning))",
+  "hsl(var(--destructive))",
+  "hsl(var(--muted-foreground))",
+  "hsl(212 95% 68%)",
 ]
 
 export default function DashboardPage() {
+  const { isAuthenticated, accessToken, user } = useAuth()
+  const router = useRouter()
+  const [submissions, setSubmissions] = useState<DashboardSubmission[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/auth/login")
+      return
+    }
+
+    const load = async () => {
+      try {
+        setLoading(true)
+        setError("")
+        const token = accessToken || localStorage.getItem("access_token")
+        if (!token) {
+          router.push("/auth/login")
+          return
+        }
+        setSubmissions(await fetchUserSubmissions(token))
+      } catch (err: any) {
+        setError(err.message || "Gagal memuat dashboard")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    load()
+  }, [isAuthenticated, accessToken, router])
+
+  const statusCounts = useMemo(() => createStatusCounts(submissions), [submissions])
+
+  const serviceData = useMemo(
+    () =>
+      dashboardServices.map((service) => ({
+        name: service.shortLabel,
+        total: submissions.filter((item) => item.service === service.value).length,
+      })),
+    [submissions]
+  )
+
+  const thisMonth = useMemo(() => {
+    const now = new Date()
+    return submissions.filter((item) => {
+      const createdAt = new Date(item.created_at)
+      return createdAt.getMonth() === now.getMonth() && createdAt.getFullYear() === now.getFullYear()
+    }).length
+  }, [submissions])
+
+  const nextAction = submissions.find((item) => item.status === "rejected") || submissions.find((item) => item.status === "pending")
+
   return (
     <div className="flex flex-col">
       <Header
         title="Dashboard"
-        description="Selamat datang di Sistem Administrasi Kependudukan"
+        description={`Selamat datang${user?.name ? `, ${user.name}` : ""}. Data yang tampil hanya pengajuan akun Anda.`}
       />
 
       <div className="flex-1 space-y-6 p-6">
-        {/* Stats Grid */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <StatsCard
-            title="Total Penduduk"
-            value="1.234.567"
-            icon={Users}
+            title="Pengajuan Saya"
+            value={loading ? "..." : submissions.length.toString()}
+            description="Total riwayat layanan"
+            icon={Inbox}
             variant="primary"
-            trend={{ value: 2.5, isPositive: true }}
           />
           <StatsCard
-            title="KTP Diproses"
-            value="156"
-            description="Bulan ini"
-            icon={CreditCard}
+            title="Bulan Ini"
+            value={loading ? "..." : thisMonth.toString()}
+            description="Pengajuan baru"
+            icon={FileCheck}
             variant="success"
-            trend={{ value: 12, isPositive: true }}
           />
           <StatsCard
-            title="Menunggu Verifikasi"
-            value="45"
-            description="Perlu tindakan"
+            title="Dalam Proses"
+            value={loading ? "..." : (statusCounts.pending + statusCounts.verifying).toString()}
+            description="Menunggu petugas"
             icon={Clock}
             variant="warning"
           />
           <StatsCard
-            title="Akta Terbit"
-            value="892"
-            description="Tahun ini"
-            icon={FileCheck}
+            title="Selesai/Disetujui"
+            value={loading ? "..." : (statusCounts.approved + statusCounts.completed).toString()}
+            description="Siap ditindaklanjuti"
+            icon={CheckCircle2}
             variant="default"
-            trend={{ value: 8, isPositive: true }}
           />
         </div>
 
-        {/* Charts Row */}
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Main Chart */}
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-lg">Statistik Bulanan</CardTitle>
+              <CardTitle className="text-lg">Ringkasan Layanan Saya</CardTitle>
+              <CardDescription>
+                Agregasi personal berdasarkan pengajuan akun ini, tanpa menampilkan data warga lain.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="h-[300px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={monthlyData}>
-                    <defs>
-                      <linearGradient id="colorKtp" x1="0" y1="0" x2="0" y2="1">
-                        <stop
-                          offset="5%"
-                          stopColor="hsl(var(--primary))"
-                          stopOpacity={0.3}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="hsl(var(--primary))"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                      <linearGradient id="colorPerkawinan" x1="0" y1="0" x2="0" y2="1">
-                        <stop
-                          offset="5%"
-                          stopColor="hsl(var(--success))"
-                          stopOpacity={0.3}
-                        />
-                        <stop
-                          offset="95%"
-                          stopColor="hsl(var(--success))"
-                          stopOpacity={0}
-                        />
-                      </linearGradient>
-                    </defs>
+                  <BarChart data={serviceData}>
                     <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
-                      dataKey="month"
-                      className="text-xs"
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
-                    />
-                    <YAxis
-                      className="text-xs"
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
-                    />
+                    <XAxis dataKey="name" tick={{ fill: "hsl(var(--muted-foreground))" }} />
+                    <YAxis allowDecimals={false} tick={{ fill: "hsl(var(--muted-foreground))" }} />
                     <Tooltip
                       contentStyle={{
                         backgroundColor: "hsl(var(--card))",
@@ -139,69 +160,50 @@ export default function DashboardPage() {
                         borderRadius: "8px",
                       }}
                     />
-                    <Area
-                      type="monotone"
-                      dataKey="ktp"
-                      stroke="hsl(var(--primary))"
-                      fillOpacity={1}
-                      fill="url(#colorKtp)"
-                      name="KTP"
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="perkawinan"
-                      stroke="hsl(var(--success))"
-                      fillOpacity={1}
-                      fill="url(#colorPerkawinan)"
-                      name="Perkawinan"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Status Chart */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-lg">Status Pengajuan</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={statusData} layout="vertical">
-                    <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                    <XAxis
-                      type="number"
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
-                    />
-                    <YAxis
-                      dataKey="name"
-                      type="category"
-                      width={80}
-                      tick={{ fill: "hsl(var(--muted-foreground))" }}
-                    />
-                    <Tooltip
-                      contentStyle={{
-                        backgroundColor: "hsl(var(--card))",
-                        border: "1px solid hsl(var(--border))",
-                        borderRadius: "8px",
-                      }}
-                    />
-                    <Bar dataKey="value" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="total" radius={[4, 4, 0, 0]} name="Pengajuan">
+                      {serviceData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={chartColors[index % chartColors.length]} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-lg">Keamanan Data</CardTitle>
+              <CardDescription>Informasi pribadi dibatasi untuk pemilik akun dan admin.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="rounded-lg border bg-muted/40 p-4">
+                <ShieldCheck className="mb-3 h-8 w-8 text-primary" />
+                <p className="text-sm font-medium">Mode privasi aktif</p>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Dashboard ini tidak menampilkan nama, NIK, alamat, atau dokumen milik warga lain.
+                </p>
+              </div>
+              {nextAction ? (
+                <Button asChild className="w-full">
+                  <Link href={`/dashboard/submissions/${nextAction.service}/${nextAction.id}`}>
+                    Tinjau pengajuan terbaru
+                  </Link>
+                </Button>
+              ) : (
+                <Button asChild className="w-full">
+                  <Link href="/dashboard/ktp/pengajuan">Mulai pengajuan KTP</Link>
+                </Button>
+              )}
+            </CardContent>
+          </Card>
         </div>
 
-        {/* Bottom Row */}
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <RecentActivity />
+            <RecentActivity submissions={submissions} loading={loading} />
           </div>
-          <QuickActions />
+          <QuickActions submissions={submissions} />
         </div>
       </div>
     </div>

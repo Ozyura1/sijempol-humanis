@@ -23,6 +23,7 @@ import {
 import { Download, AlertCircle, FileText, TrendingUp } from "lucide-react"
 import { useAuth } from "@/contexts/auth-context"
 import { useRouter } from "next/navigation"
+import { buildSubmissionsCsv, downloadTextFile } from "@/lib/dashboard-data"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
@@ -30,6 +31,7 @@ export default function LaporanPage() {
   const { isAuthenticated, accessToken } = useAuth()
   const router = useRouter()
   const [stats, setStats] = useState<any>(null)
+  const [submissions, setSubmissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
 
@@ -68,12 +70,21 @@ export default function LaporanPage() {
           if (response.ok) {
             const data = await response.json()
             const submissions = Array.isArray(data) ? data : data.data || []
-            allSubmissions.push(...submissions.map((sub: any) => ({ ...sub, service: service.label })))
+            allSubmissions.push(
+              ...submissions.map((sub: any) => ({
+                ...sub,
+                service: service.value,
+                serviceLabel: service.label,
+                serviceShortLabel: service.label,
+              }))
+            )
           }
         } catch (err) {
           console.error(`Error fetching ${service.value}:`, err)
         }
       }
+
+      setSubmissions(allSubmissions)
 
       // Calculate statistics
       const byStatus = {
@@ -97,8 +108,8 @@ export default function LaporanPage() {
         if (sub.status in byStatus) {
           byStatus[sub.status as keyof typeof byStatus]++
         }
-        if (sub.service in byService) {
-          byService[sub.service]++
+        if (sub.serviceLabel in byService) {
+          byService[sub.serviceLabel]++
         }
 
         const subDate = new Date(sub.created_at)
@@ -135,11 +146,11 @@ export default function LaporanPage() {
   }
 
   const handleExportPDF = () => {
-    alert("Fitur export PDF sedang dikembangkan")
+    window.print()
   }
 
   const handleExportExcel = () => {
-    alert("Fitur export Excel sedang dikembangkan")
+    downloadTextFile("laporan-pengajuan-saya.csv", buildSubmissionsCsv(submissions))
   }
 
   if (!isAuthenticated) {
@@ -175,7 +186,7 @@ export default function LaporanPage() {
                 className="gap-2"
               >
                 <Download className="h-4 w-4" />
-                Export PDF
+                Cetak / PDF
               </Button>
               <Button
                 variant="outline"
@@ -183,7 +194,7 @@ export default function LaporanPage() {
                 className="gap-2"
               >
                 <Download className="h-4 w-4" />
-                Export Excel
+                Export CSV
               </Button>
             </div>
 

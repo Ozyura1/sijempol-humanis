@@ -1,678 +1,249 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Header } from "@/components/dashboard/header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Badge } from "@/components/ui/badge"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { ArrowLeft, Upload, CheckCircle2, AlertCircle, Baby } from "lucide-react"
+import { Spinner } from "@/components/ui/spinner"
+import { Baby, CheckCircle2, Clock, Download, Eye, Filter, Plus, Search, XCircle, AlertCircle } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
+import {
+  buildSubmissionsCsv,
+  createStatusCounts,
+  downloadTextFile,
+  fetchUserSubmissions,
+  type DashboardSubmission,
+} from "@/lib/dashboard-data"
+import { formatDate, getStatusBadgeColor, getStatusLabel } from "@/lib/submission-utils"
 
-export default function KelahiranPengajuanPage() {
-  const [formData, setFormData] = useState({
-    // Data Bayi
-    namaBayi: "",
-    jenisKelaminBayi: "",
-    tempatLahir: "",
-    tanggalLahir: "",
-    waktuLahir: "",
-    jenisKelahiran: "",
-    kelahiranKe: "",
-    penolongKelahiran: "",
-    beratBayi: "",
-    panjangBayi: "",
+export default function KelahiranPage() {
+  const router = useRouter()
+  const { isAuthenticated, accessToken } = useAuth()
+  const [submissions, setSubmissions] = useState<DashboardSubmission[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
+  const [searchQuery, setSearchQuery] = useState("")
+  const [statusFilter, setStatusFilter] = useState("all")
 
-    // Data Ayah
-    nikAyah: "",
-    namaAyah: "",
-    tempatLahirAyah: "",
-    tanggalLahirAyah: "",
-    agamaAyah: "",
-    pekerjaanAyah: "",
-    alamatAyah: "",
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/auth/login")
+      return
+    }
 
-    // Data Ibu
-    nikIbu: "",
-    namaIbu: "",
-    tempatLahirIbu: "",
-    tanggalLahirIbu: "",
-    agamaIbu: "",
-    pekerjaanIbu: "",
-    alamatIbu: "",
+    const load = async () => {
+      try {
+        setLoading(true)
+        setError("")
+        const token = accessToken || localStorage.getItem("access_token")
+        if (!token) return
+        const data = await fetchUserSubmissions(token)
+        setSubmissions(data.filter((item) => item.service === "births"))
+      } catch (err: any) {
+        setError(err.message || "Gagal memuat pengajuan kelahiran")
+      } finally {
+        setLoading(false)
+      }
+    }
 
-    // Data Pelapor
-    nikPelapor: "",
-    namaPelapor: "",
-    hubunganPelapor: "",
+    load()
+  }, [isAuthenticated, accessToken, router])
 
-    // Kontak
-    nomorHp: "",
-    email: "",
-  })
+  const filteredData = useMemo(() => {
+    return submissions.filter((record) => {
+      const query = searchQuery.toLowerCase()
+      const matchesSearch =
+        !query ||
+        String(record.id).toLowerCase().includes(query) ||
+        record.applicant_name?.toLowerCase().includes(query)
+      const matchesStatus = statusFilter === "all" || record.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [submissions, searchQuery, statusFilter])
 
-  const [documents, setDocuments] = useState({
-    fotoKkOrtu: null as File | null,
-    fotoKtpAyah: null as File | null,
-    fotoKtpIbu: null as File | null,
-    fotoSuratKelahiran: null as File | null,
-    fotoBukuNikah: null as File | null,
-  })
-
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [isSubmitted, setIsSubmitted] = useState(false)
-
-  const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }))
-  }
-
-  const handleFileChange = (field: string, file: File | null) => {
-    setDocuments(prev => ({ ...prev, [field]: file }))
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
-
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 2000))
-
-    setIsSubmitted(true)
-    setIsSubmitting(false)
-  }
-
-  if (isSubmitted) {
-    return (
-      <div className="flex flex-col">
-        <Header
-          title="Pengajuan Akta Kelahiran"
-          description="Formulir pengajuan akta kelahiran"
-        />
-
-        <div className="flex-1 flex items-center justify-center p-6">
-          <Card className="w-full max-w-md">
-            <CardContent className="pt-6">
-              <div className="text-center">
-                <Baby className="h-16 w-16 text-green-500 mx-auto mb-4" />
-                <h2 className="text-2xl font-bold mb-2">Pengajuan Berhasil!</h2>
-                <p className="text-muted-foreground mb-6">
-                  Pengajuan akta kelahiran Anda telah berhasil dikirim. Nomor pengajuan: <strong>KELAHIRAN-2026-001</strong>
-                </p>
-                <div className="space-y-3">
-                  <Link href="/dashboard/status">
-                    <Button className="w-full">
-                      Lihat Status Pengajuan
-                    </Button>
-                  </Link>
-                  <Link href="/dashboard">
-                    <Button variant="outline" className="w-full">
-                      Kembali ke Dashboard
-                    </Button>
-                  </Link>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    )
-  }
+  const counts = useMemo(() => createStatusCounts(submissions), [submissions])
 
   return (
     <div className="flex flex-col">
       <Header
-        title="Pengajuan Akta Kelahiran"
-        description="Formulir pengajuan akta kelahiran"
+        title="Akta Kelahiran Saya"
+        description="Riwayat pengajuan akta kelahiran milik akun Anda"
       />
 
       <div className="flex-1 space-y-6 p-6">
-        <div className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Kembali
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-2xl font-bold">Form Pengajuan Akta Kelahiran</h1>
-            <p className="text-muted-foreground">Lengkapi data kelahiran bayi untuk pencatatan akta</p>
-          </div>
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
+        <div className="grid gap-4 md:grid-cols-4">
+          <Card className="border-l-4 border-l-primary">
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Total</p>
+                <p className="text-2xl font-bold">{submissions.length}</p>
+              </div>
+              <Baby className="h-8 w-8 text-primary" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Menunggu</p>
+                <p className="text-2xl font-bold text-amber-600">{counts.pending}</p>
+              </div>
+              <Clock className="h-8 w-8 text-amber-500" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Disetujui/Selesai</p>
+                <p className="text-2xl font-bold text-emerald-600">{counts.approved + counts.completed}</p>
+              </div>
+              <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Ditolak</p>
+                <p className="text-2xl font-bold text-red-600">{counts.rejected}</p>
+              </div>
+              <XCircle className="h-8 w-8 text-red-500" />
+            </CardContent>
+          </Card>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Data Bayi */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Bayi</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="namaBayi">Nama Lengkap Bayi *</Label>
-                  <Input
-                    id="namaBayi"
-                    placeholder="Nama lengkap bayi"
-                    value={formData.namaBayi}
-                    onChange={(e) => handleInputChange("namaBayi", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="jenisKelaminBayi">Jenis Kelamin *</Label>
-                  <Select value={formData.jenisKelaminBayi} onValueChange={(value) => handleInputChange("jenisKelaminBayi", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih jenis kelamin" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="L">Laki-laki</SelectItem>
-                      <SelectItem value="P">Perempuan</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="tempatLahir">Tempat Lahir *</Label>
-                  <Input
-                    id="tempatLahir"
-                    placeholder="Kota/kabupaten kelahiran"
-                    value={formData.tempatLahir}
-                    onChange={(e) => handleInputChange("tempatLahir", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tanggalLahir">Tanggal Lahir *</Label>
-                  <Input
-                    id="tanggalLahir"
-                    type="date"
-                    value={formData.tanggalLahir}
-                    onChange={(e) => handleInputChange("tanggalLahir", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="waktuLahir">Waktu Lahir</Label>
-                  <Input
-                    id="waktuLahir"
-                    type="time"
-                    value={formData.waktuLahir}
-                    onChange={(e) => handleInputChange("waktuLahir", e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-4">
-                <div className="space-y-2">
-                  <Label htmlFor="jenisKelahiran">Jenis Kelahiran *</Label>
-                  <Select value={formData.jenisKelahiran} onValueChange={(value) => handleInputChange("jenisKelahiran", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih jenis" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tunggal">Tunggal</SelectItem>
-                      <SelectItem value="kembar">Kembar</SelectItem>
-                      <SelectItem value="kembar-2">Kembar 2</SelectItem>
-                      <SelectItem value="kembar-3">Kembar 3</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="kelahiranKe">Kelahiran ke *</Label>
-                  <Input
-                    id="kelahiranKe"
-                    type="number"
-                    placeholder="1"
-                    value={formData.kelahiranKe}
-                    onChange={(e) => handleInputChange("kelahiranKe", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="penolongKelahiran">Penolong Kelahiran *</Label>
-                  <Select value={formData.penolongKelahiran} onValueChange={(value) => handleInputChange("penolongKelahiran", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih penolong" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="dokter">Dokter</SelectItem>
-                      <SelectItem value="bidan">Bidan</SelectItem>
-                      <SelectItem value="dukun">Dukun</SelectItem>
-                      <SelectItem value="lainnya">Lainnya</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="beratBayi">Berat Bayi (kg)</Label>
-                  <Input
-                    id="beratBayi"
-                    placeholder="3.2"
-                    value={formData.beratBayi}
-                    onChange={(e) => handleInputChange("beratBayi", e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="panjangBayi">Panjang Bayi (cm)</Label>
-                  <Input
-                    id="panjangBayi"
-                    placeholder="50"
-                    value={formData.panjangBayi}
-                    onChange={(e) => handleInputChange("panjangBayi", e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Data Ayah */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Ayah</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="nikAyah">NIK Ayah *</Label>
-                  <Input
-                    id="nikAyah"
-                    placeholder="16 digit NIK"
-                    value={formData.nikAyah}
-                    onChange={(e) => handleInputChange("nikAyah", e.target.value)}
-                    maxLength={16}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="namaAyah">Nama Lengkap Ayah *</Label>
-                  <Input
-                    id="namaAyah"
-                    placeholder="Nama lengkap ayah"
-                    value={formData.namaAyah}
-                    onChange={(e) => handleInputChange("namaAyah", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="tempatLahirAyah">Tempat Lahir Ayah *</Label>
-                  <Input
-                    id="tempatLahirAyah"
-                    placeholder="Kota kelahiran"
-                    value={formData.tempatLahirAyah}
-                    onChange={(e) => handleInputChange("tempatLahirAyah", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tanggalLahirAyah">Tanggal Lahir Ayah *</Label>
-                  <Input
-                    id="tanggalLahirAyah"
-                    type="date"
-                    value={formData.tanggalLahirAyah}
-                    onChange={(e) => handleInputChange("tanggalLahirAyah", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="agamaAyah">Agama Ayah *</Label>
-                  <Select value={formData.agamaAyah} onValueChange={(value) => handleInputChange("agamaAyah", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih agama" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="islam">Islam</SelectItem>
-                      <SelectItem value="kristen">Kristen</SelectItem>
-                      <SelectItem value="katolik">Katolik</SelectItem>
-                      <SelectItem value="hindu">Hindu</SelectItem>
-                      <SelectItem value="buddha">Buddha</SelectItem>
-                      <SelectItem value="konghucu">Konghucu</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="pekerjaanAyah">Pekerjaan Ayah *</Label>
-                  <Input
-                    id="pekerjaanAyah"
-                    placeholder="Pekerjaan ayah"
-                    value={formData.pekerjaanAyah}
-                    onChange={(e) => handleInputChange("pekerjaanAyah", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="alamatAyah">Alamat Ayah *</Label>
-                  <Textarea
-                    id="alamatAyah"
-                    placeholder="Alamat lengkap ayah"
-                    value={formData.alamatAyah}
-                    onChange={(e) => handleInputChange("alamatAyah", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Data Ibu */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Ibu</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="nikIbu">NIK Ibu *</Label>
-                  <Input
-                    id="nikIbu"
-                    placeholder="16 digit NIK"
-                    value={formData.nikIbu}
-                    onChange={(e) => handleInputChange("nikIbu", e.target.value)}
-                    maxLength={16}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="namaIbu">Nama Lengkap Ibu *</Label>
-                  <Input
-                    id="namaIbu"
-                    placeholder="Nama lengkap ibu"
-                    value={formData.namaIbu}
-                    onChange={(e) => handleInputChange("namaIbu", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="tempatLahirIbu">Tempat Lahir Ibu *</Label>
-                  <Input
-                    id="tempatLahirIbu"
-                    placeholder="Kota kelahiran"
-                    value={formData.tempatLahirIbu}
-                    onChange={(e) => handleInputChange("tempatLahirIbu", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="tanggalLahirIbu">Tanggal Lahir Ibu *</Label>
-                  <Input
-                    id="tanggalLahirIbu"
-                    type="date"
-                    value={formData.tanggalLahirIbu}
-                    onChange={(e) => handleInputChange("tanggalLahirIbu", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="agamaIbu">Agama Ibu *</Label>
-                  <Select value={formData.agamaIbu} onValueChange={(value) => handleInputChange("agamaIbu", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih agama" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="islam">Islam</SelectItem>
-                      <SelectItem value="kristen">Kristen</SelectItem>
-                      <SelectItem value="katolik">Katolik</SelectItem>
-                      <SelectItem value="hindu">Hindu</SelectItem>
-                      <SelectItem value="buddha">Buddha</SelectItem>
-                      <SelectItem value="konghucu">Konghucu</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="pekerjaanIbu">Pekerjaan Ibu *</Label>
-                  <Input
-                    id="pekerjaanIbu"
-                    placeholder="Pekerjaan ibu"
-                    value={formData.pekerjaanIbu}
-                    onChange={(e) => handleInputChange("pekerjaanIbu", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="alamatIbu">Alamat Ibu *</Label>
-                  <Textarea
-                    id="alamatIbu"
-                    placeholder="Alamat lengkap ibu"
-                    value={formData.alamatIbu}
-                    onChange={(e) => handleInputChange("alamatIbu", e.target.value)}
-                    required
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Data Pelapor */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Data Pelapor</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-3">
-                <div className="space-y-2">
-                  <Label htmlFor="nikPelapor">NIK Pelapor *</Label>
-                  <Input
-                    id="nikPelapor"
-                    placeholder="16 digit NIK"
-                    value={formData.nikPelapor}
-                    onChange={(e) => handleInputChange("nikPelapor", e.target.value)}
-                    maxLength={16}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="namaPelapor">Nama Pelapor *</Label>
-                  <Input
-                    id="namaPelapor"
-                    placeholder="Nama lengkap pelapor"
-                    value={formData.namaPelapor}
-                    onChange={(e) => handleInputChange("namaPelapor", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="hubunganPelapor">Hubungan dengan Bayi *</Label>
-                  <Select value={formData.hubunganPelapor} onValueChange={(value) => handleInputChange("hubunganPelapor", value)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Pilih hubungan" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ayah">Ayah</SelectItem>
-                      <SelectItem value="ibu">Ibu</SelectItem>
-                      <SelectItem value="keluarga">Keluarga Lain</SelectItem>
-                      <SelectItem value="saksi">Saksi</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Kontak */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Informasi Kontak</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="nomorHp">Nomor HP *</Label>
-                  <Input
-                    id="nomorHp"
-                    placeholder="081234567890"
-                    value={formData.nomorHp}
-                    onChange={(e) => handleInputChange("nomorHp", e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="email@example.com"
-                    value={formData.email}
-                    onChange={(e) => handleInputChange("email", e.target.value)}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Upload Dokumen */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Upload Dokumen</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                Unggah dokumen dalam format PDF, JPG, atau PNG (maksimal 2MB per file)
-              </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>Foto Kartu Keluarga Orang Tua *</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange("fotoKkOrtu", e.target.files?.[0] || null)}
-                      className="hidden"
-                      id="fotoKkOrtu"
-                      required
-                    />
-                    <Label htmlFor="fotoKkOrtu" className="flex items-center gap-2 cursor-pointer border rounded-md px-3 py-2 hover:bg-muted">
-                      <Upload className="h-4 w-4" />
-                      {documents.fotoKkOrtu ? documents.fotoKkOrtu.name : "Pilih File"}
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Foto KTP Ayah *</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange("fotoKtpAyah", e.target.files?.[0] || null)}
-                      className="hidden"
-                      id="fotoKtpAyah"
-                      required
-                    />
-                    <Label htmlFor="fotoKtpAyah" className="flex items-center gap-2 cursor-pointer border rounded-md px-3 py-2 hover:bg-muted">
-                      <Upload className="h-4 w-4" />
-                      {documents.fotoKtpAyah ? documents.fotoKtpAyah.name : "Pilih File"}
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Foto KTP Ibu *</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange("fotoKtpIbu", e.target.files?.[0] || null)}
-                      className="hidden"
-                      id="fotoKtpIbu"
-                      required
-                    />
-                    <Label htmlFor="fotoKtpIbu" className="flex items-center gap-2 cursor-pointer border rounded-md px-3 py-2 hover:bg-muted">
-                      <Upload className="h-4 w-4" />
-                      {documents.fotoKtpIbu ? documents.fotoKtpIbu.name : "Pilih File"}
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Surat Keterangan Kelahiran dari RS/Bidan *</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange("fotoSuratKelahiran", e.target.files?.[0] || null)}
-                      className="hidden"
-                      id="fotoSuratKelahiran"
-                      required
-                    />
-                    <Label htmlFor="fotoSuratKelahiran" className="flex items-center gap-2 cursor-pointer border rounded-md px-3 py-2 hover:bg-muted">
-                      <Upload className="h-4 w-4" />
-                      {documents.fotoSuratKelahiran ? documents.fotoSuratKelahiran.name : "Pilih File"}
-                    </Label>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Foto Buku Nikah Orang Tua *</Label>
-                  <div className="flex items-center gap-2">
-                    <Input
-                      type="file"
-                      accept=".pdf,.jpg,.jpeg,.png"
-                      onChange={(e) => handleFileChange("fotoBukuNikah", e.target.files?.[0] || null)}
-                      className="hidden"
-                      id="fotoBukuNikah"
-                      required
-                    />
-                    <Label htmlFor="fotoBukuNikah" className="flex items-center gap-2 cursor-pointer border rounded-md px-3 py-2 hover:bg-muted">
-                      <Upload className="h-4 w-4" />
-                      {documents.fotoBukuNikah ? documents.fotoBukuNikah.name : "Pilih File"}
-                    </Label>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Persetujuan */}
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                <Alert>
-                  <AlertCircle className="h-4 w-4" />
-                  <AlertDescription>
-                    Dengan mengajukan permohonan ini, saya menyatakan bahwa semua data yang saya berikan adalah benar dan saya bertanggung jawab atas kebenarannya. Saya juga menyatakan bahwa bayi yang dilaporkan adalah anak kandung dari orang tua yang disebutkan.
-                  </AlertDescription>
-                </Alert>
-
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="agreement" required />
-                  <Label htmlFor="agreement" className="text-sm">
-                    Saya menyetujui syarat dan ketentuan yang berlaku
-                  </Label>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Submit Button */}
-          <div className="flex gap-4">
-            <Button type="submit" disabled={isSubmitting} className="flex-1">
-              {isSubmitting ? "Mengirim Pengajuan..." : "Kirim Pengajuan"}
-            </Button>
-            <Link href="/dashboard">
-              <Button type="button" variant="outline">
-                Batal
+        <Card>
+          <CardHeader className="pb-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <CardTitle>Daftar Pengajuan Kelahiran Saya</CardTitle>
+              <Button asChild className="gap-2">
+                <Link href="/dashboard/kelahiran/pengajuan">
+                  <Plus className="h-4 w-4" />
+                  Tambah Pengajuan
+                </Link>
               </Button>
-            </Link>
-          </div>
-        </form>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Cari nomor pengajuan atau nama pemohon..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full sm:w-[190px]">
+                  <Filter className="mr-2 h-4 w-4" />
+                  <SelectValue placeholder="Filter Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Status</SelectItem>
+                  <SelectItem value="pending">Menunggu</SelectItem>
+                  <SelectItem value="verifying">Diproses</SelectItem>
+                  <SelectItem value="approved">Disetujui</SelectItem>
+                  <SelectItem value="rejected">Ditolak</SelectItem>
+                  <SelectItem value="completed">Selesai</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                onClick={() => downloadTextFile("pengajuan-kelahiran-saya.csv", buildSubmissionsCsv(filteredData))}
+              >
+                <Download className="h-4 w-4" />
+                Export
+              </Button>
+            </div>
+
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <Spinner className="h-8 w-8" />
+              </div>
+            ) : filteredData.length === 0 ? (
+              <div className="rounded-lg border border-dashed py-12 text-center">
+                <p className="mb-4 text-muted-foreground">Belum ada pengajuan kelahiran yang sesuai.</p>
+                <Button asChild>
+                  <Link href="/dashboard/kelahiran/pengajuan">Buat Pengajuan Kelahiran</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>No. Pengajuan</TableHead>
+                      <TableHead>Pemohon</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="hidden sm:table-cell">Tanggal Pengajuan</TableHead>
+                      <TableHead className="w-[100px]">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredData.map((record) => (
+                      <TableRow key={record.id}>
+                        <TableCell className="font-mono text-sm">
+                          LHR-{String(record.id).padStart(4, "0")}
+                        </TableCell>
+                        <TableCell>{record.applicant_name || "Pemohon"}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusBadgeColor(record.status)}>
+                            {getStatusLabel(record.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">{formatDate(record.created_at)}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => router.push(`/dashboard/submissions/${record.service}/${record.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                            Detail
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            <div className="mt-4 text-sm text-muted-foreground">
+              Menampilkan {filteredData.length} dari {submissions.length} pengajuan kelahiran milik akun Anda
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )

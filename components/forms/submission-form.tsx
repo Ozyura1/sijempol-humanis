@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -132,8 +133,22 @@ export function SubmissionForm({
       }
 
       // Prepare submission data
+      const applicantName =
+        formData.applicant_name ||
+        formData.nama_lengkap ||
+        formData.nama_anak ||
+        formData.nama_almarhum ||
+        formData.nama_pemohon ||
+        formData.nama_suami ||
+        formData.nama_istri ||
+        formData.nama_kepala_keluarga ||
+        formData.groom_name ||
+        formData.family_head_name ||
+        formData.name ||
+        "Pemohon"
+
       const submissionData = {
-        applicant_name: formData.applicant_name || formData.nama_lengkap || formData.name || "Unknown",
+        applicant_name: applicantName,
         data: formData,
         documents,
       }
@@ -174,14 +189,20 @@ export function SubmissionForm({
               </p>
             </div>
           )}
-          <Button
-            onClick={() => {
-              setSubmitted(false)
-              setSubmissionId(null)
-            }}
-          >
-            Buat Pengajuan Baru
-          </Button>
+          <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+            <Button asChild>
+              <Link href="/dashboard/status">Lihat Status Pengajuan</Link>
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSubmitted(false)
+                setSubmissionId(null)
+              }}
+            >
+              Buat Pengajuan Baru
+            </Button>
+          </div>
         </CardContent>
       </Card>
     )

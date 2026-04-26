@@ -1,6 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Header } from "@/components/dashboard/header"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -15,323 +17,227 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Spinner } from "@/components/ui/spinner"
+import { Search, Plus, Eye, Download, Filter, CheckCircle2, Clock, XCircle, AlertCircle } from "lucide-react"
+import { useAuth } from "@/contexts/auth-context"
 import {
-  Search,
-  Plus,
-  MoreHorizontal,
-  Eye,
-  Edit,
-  Trash2,
-  Download,
-  Filter,
-  CheckCircle2,
-  Clock,
-  XCircle,
-  AlertCircle,
-} from "lucide-react"
-import Link from "next/link"
-
-interface KTPRecord {
-  id: string
-  nik: string
-  name: string
-  address: string
-  birthDate: string
-  gender: "L" | "P"
-  status: "pending" | "verified" | "approved" | "rejected"
-  createdAt: string
-}
-
-const mockData: KTPRecord[] = [
-  {
-    id: "1",
-    nik: "3201234567890001",
-    name: "Ahmad Surya Wijaya",
-    address: "Jl. Merdeka No. 123, Jakarta Pusat",
-    birthDate: "1990-05-15",
-    gender: "L",
-    status: "pending",
-    createdAt: "2026-04-10",
-  },
-  {
-    id: "2",
-    nik: "3201234567890002",
-    name: "Siti Aminah",
-    address: "Jl. Sudirman No. 45, Jakarta Selatan",
-    birthDate: "1985-08-22",
-    gender: "P",
-    status: "verified",
-    createdAt: "2026-04-09",
-  },
-  {
-    id: "3",
-    nik: "3201234567890003",
-    name: "Budi Santoso",
-    address: "Jl. Gatot Subroto No. 78, Jakarta Barat",
-    birthDate: "1992-12-03",
-    gender: "L",
-    status: "approved",
-    createdAt: "2026-04-08",
-  },
-  {
-    id: "4",
-    nik: "3201234567890004",
-    name: "Dewi Lestari",
-    address: "Jl. Thamrin No. 90, Jakarta Pusat",
-    birthDate: "1988-03-17",
-    gender: "P",
-    status: "rejected",
-    createdAt: "2026-04-07",
-  },
-  {
-    id: "5",
-    nik: "3201234567890005",
-    name: "Rudi Hartono",
-    address: "Jl. Kuningan No. 12, Jakarta Selatan",
-    birthDate: "1995-07-28",
-    gender: "L",
-    status: "pending",
-    createdAt: "2026-04-06",
-  },
-]
-
-const statusConfig = {
-  pending: {
-    label: "Menunggu",
-    icon: Clock,
-    className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
-  },
-  verified: {
-    label: "Terverifikasi",
-    icon: AlertCircle,
-    className: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
-  },
-  approved: {
-    label: "Disetujui",
-    icon: CheckCircle2,
-    className: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
-  },
-  rejected: {
-    label: "Ditolak",
-    icon: XCircle,
-    className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400",
-  },
-}
+  buildSubmissionsCsv,
+  createStatusCounts,
+  downloadTextFile,
+  fetchUserSubmissions,
+  type DashboardSubmission,
+} from "@/lib/dashboard-data"
+import { formatDate, getStatusBadgeColor, getStatusLabel } from "@/lib/submission-utils"
 
 export default function KTPPage() {
+  const router = useRouter()
+  const { isAuthenticated, accessToken } = useAuth()
+  const [submissions, setSubmissions] = useState<DashboardSubmission[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<string>("all")
 
-  const filteredData = mockData.filter((record) => {
-    const matchesSearch =
-      record.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      record.nik.includes(searchQuery)
-    const matchesStatus = statusFilter === "all" || record.status === statusFilter
-    return matchesSearch && matchesStatus
-  })
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.push("/auth/login")
+      return
+    }
+
+    const load = async () => {
+      try {
+        setLoading(true)
+        setError("")
+        const token = accessToken || localStorage.getItem("access_token")
+        if (!token) return
+        const data = await fetchUserSubmissions(token)
+        setSubmissions(data.filter((item) => item.service === "id-cards"))
+      } catch (err: any) {
+        setError(err.message || "Gagal memuat pengajuan KTP")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    load()
+  }, [isAuthenticated, accessToken, router])
+
+  const filteredData = useMemo(() => {
+    return submissions.filter((record) => {
+      const query = searchQuery.toLowerCase()
+      const matchesSearch =
+        !query ||
+        String(record.id).toLowerCase().includes(query) ||
+        record.applicant_name?.toLowerCase().includes(query)
+      const matchesStatus = statusFilter === "all" || record.status === statusFilter
+      return matchesSearch && matchesStatus
+    })
+  }, [submissions, searchQuery, statusFilter])
+
+  const counts = useMemo(() => createStatusCounts(submissions), [submissions])
 
   return (
     <div className="flex flex-col">
       <Header
-        title="Data KTP"
-        description="Kelola data Kartu Tanda Penduduk"
+        title="KTP Elektronik Saya"
+        description="Riwayat pengajuan KTP milik akun Anda"
       />
 
       <div className="flex-1 space-y-6 p-6">
-        {/* Stats Cards */}
+        {error && (
+          <Alert variant="destructive">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid gap-4 md:grid-cols-4">
           <Card>
             <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Total</p>
-                  <p className="text-2xl font-bold">1,234</p>
-                </div>
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <span className="text-lg font-bold text-primary">K</span>
-                </div>
-              </div>
+              <p className="text-sm text-muted-foreground">Total</p>
+              <p className="text-2xl font-bold">{submissions.length}</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Menunggu</p>
-                  <p className="text-2xl font-bold text-amber-600">45</p>
-                </div>
-                <Clock className="h-8 w-8 text-amber-500" />
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Menunggu</p>
+                <p className="text-2xl font-bold text-amber-600">{counts.pending}</p>
               </div>
+              <Clock className="h-8 w-8 text-amber-500" />
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Disetujui</p>
-                  <p className="text-2xl font-bold text-emerald-600">1,156</p>
-                </div>
-                <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Disetujui/Selesai</p>
+                <p className="text-2xl font-bold text-emerald-600">{counts.approved + counts.completed}</p>
               </div>
+              <CheckCircle2 className="h-8 w-8 text-emerald-500" />
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">Ditolak</p>
-                  <p className="text-2xl font-bold text-red-600">33</p>
-                </div>
-                <XCircle className="h-8 w-8 text-red-500" />
+            <CardContent className="flex items-center justify-between p-4">
+              <div>
+                <p className="text-sm text-muted-foreground">Ditolak</p>
+                <p className="text-2xl font-bold text-red-600">{counts.rejected}</p>
               </div>
+              <XCircle className="h-8 w-8 text-red-500" />
             </CardContent>
           </Card>
         </div>
 
-        {/* Table Card */}
         <Card>
           <CardHeader className="pb-4">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <CardTitle>Daftar Pengajuan KTP</CardTitle>
-              <Link href="/dashboard/ktp/pengajuan">
-                <Button className="gap-2">
+              <CardTitle>Daftar Pengajuan KTP Saya</CardTitle>
+              <Button asChild className="gap-2">
+                <Link href="/dashboard/ktp/pengajuan">
                   <Plus className="h-4 w-4" />
                   Tambah Pengajuan
-                </Button>
-              </Link>
+                </Link>
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
-            {/* Filters */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
-                  placeholder="Cari berdasarkan NIK atau nama..."
+                  placeholder="Cari nomor pengajuan atau nama pemohon..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="pl-10"
                 />
               </div>
               <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="w-full sm:w-[180px]">
+                <SelectTrigger className="w-full sm:w-[190px]">
                   <Filter className="mr-2 h-4 w-4" />
                   <SelectValue placeholder="Filter Status" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Semua Status</SelectItem>
                   <SelectItem value="pending">Menunggu</SelectItem>
-                  <SelectItem value="verified">Terverifikasi</SelectItem>
+                  <SelectItem value="verifying">Diproses</SelectItem>
                   <SelectItem value="approved">Disetujui</SelectItem>
                   <SelectItem value="rejected">Ditolak</SelectItem>
+                  <SelectItem value="completed">Selesai</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="outline" className="gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="gap-2"
+                onClick={() => downloadTextFile("pengajuan-ktp-saya.csv", buildSubmissionsCsv(filteredData))}
+              >
                 <Download className="h-4 w-4" />
                 Export
               </Button>
             </div>
 
-            {/* Table */}
-            <div className="rounded-lg border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>NIK</TableHead>
-                    <TableHead>Nama Lengkap</TableHead>
-                    <TableHead className="hidden md:table-cell">Alamat</TableHead>
-                    <TableHead className="hidden lg:table-cell">Tanggal Lahir</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="hidden sm:table-cell">Tanggal Pengajuan</TableHead>
-                    <TableHead className="w-[70px]">Aksi</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((record) => {
-                    const status = statusConfig[record.status]
-                    const StatusIcon = status.icon
-                    return (
-                      <TableRow key={record.id}>
-                        <TableCell className="font-mono text-sm">
-                          {record.nik}
-                        </TableCell>
-                        <TableCell>
-                          <div>
-                            <p className="font-medium">{record.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {record.gender === "L" ? "Laki-laki" : "Perempuan"}
-                            </p>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden max-w-[200px] truncate md:table-cell">
-                          {record.address}
-                        </TableCell>
-                        <TableCell className="hidden lg:table-cell">
-                          {new Date(record.birthDate).toLocaleDateString("id-ID")}
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="secondary" className={status.className}>
-                            <StatusIcon className="mr-1 h-3 w-3" />
-                            {status.label}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="hidden sm:table-cell">
-                          {new Date(record.createdAt).toLocaleDateString("id-ID")}
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem className="gap-2">
-                                <Eye className="h-4 w-4" />
-                                Lihat Detail
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-2">
-                                <Edit className="h-4 w-4" />
-                                Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="gap-2 text-destructive">
-                                <Trash2 className="h-4 w-4" />
-                                Hapus
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  })}
-                </TableBody>
-              </Table>
-            </div>
-
-            {/* Pagination Info */}
-            <div className="mt-4 flex items-center justify-between text-sm text-muted-foreground">
-              <p>Menampilkan {filteredData.length} dari {mockData.length} data</p>
-              <div className="flex gap-2">
-                <Button variant="outline" size="sm" disabled>
-                  Sebelumnya
-                </Button>
-                <Button variant="outline" size="sm">
-                  Selanjutnya
+            {loading ? (
+              <div className="flex justify-center py-12">
+                <Spinner className="h-8 w-8" />
+              </div>
+            ) : filteredData.length === 0 ? (
+              <div className="rounded-lg border border-dashed py-12 text-center">
+                <p className="mb-4 text-muted-foreground">Belum ada pengajuan KTP yang sesuai.</p>
+                <Button asChild>
+                  <Link href="/dashboard/ktp/pengajuan">Buat Pengajuan KTP</Link>
                 </Button>
               </div>
+            ) : (
+              <div className="rounded-lg border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>No. Pengajuan</TableHead>
+                      <TableHead>Pemohon</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="hidden sm:table-cell">Tanggal Pengajuan</TableHead>
+                      <TableHead className="w-[100px]">Aksi</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredData.map((record) => (
+                      <TableRow key={record.id}>
+                        <TableCell className="font-mono text-sm">
+                          KTP-{String(record.id).padStart(4, "0")}
+                        </TableCell>
+                        <TableCell>{record.applicant_name || "Pemohon"}</TableCell>
+                        <TableCell>
+                          <Badge className={getStatusBadgeColor(record.status)}>
+                            {getStatusLabel(record.status)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="hidden sm:table-cell">{formatDate(record.created_at)}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="gap-2"
+                            onClick={() => router.push(`/dashboard/submissions/${record.service}/${record.id}`)}
+                          >
+                            <Eye className="h-4 w-4" />
+                            Detail
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            <div className="mt-4 text-sm text-muted-foreground">
+              Menampilkan {filteredData.length} dari {submissions.length} pengajuan KTP milik akun Anda
             </div>
           </CardContent>
         </Card>

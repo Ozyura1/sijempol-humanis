@@ -204,12 +204,12 @@ export default function HomePage() {
                   <CardDescription>{service.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Link href={service.href}>
-                    <Button variant="link" className="gap-2 p-0">
+                  <Button asChild variant="link" className="gap-2 p-0">
+                    <Link href={service.href}>
                       Pelajari lebih lanjut
                       <ArrowRight className="h-4 w-4" />
-                    </Button>
-                  </Link>
+                    </Link>
+                  </Button>
                 </CardContent>
               </Card>
             ))}
@@ -297,12 +297,12 @@ export default function HomePage() {
           </div>
 
           <div className="mt-10 flex justify-center">
-            <Link href="/hubungi-kami">
-              <Button size="lg" className="gap-2">
+            <Button asChild size="lg" className="gap-2">
+              <Link href="/hubungi-kami">
                 Hubungi Kami Lebih Lanjut
                 <ArrowRight className="h-4 w-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

@@ -230,7 +230,7 @@ export default function HubungiKamiPage() {
               <h4 className="font-semibold mb-4">Navigasi</h4>
               <ul className="space-y-2 text-sm opacity-80">
                 <li><Link href="/#layanan" className="hover:opacity-100">Layanan</Link></li>
-                <li><Link href="/cek-status" className="hover:opacity-100">Cek Jadwal</Link></li>
+                <li><Link href="/jadwal" className="hover:opacity-100">Cek Jadwal</Link></li>
                 <li><Link href="/#tentang" className="hover:opacity-100">Tentang Kami</Link></li>
               </ul>
             </div>
@@ -238,9 +238,9 @@ export default function HubungiKamiPage() {
             <div>
               <h4 className="font-semibold mb-4">Dukungan</h4>
               <ul className="space-y-2 text-sm opacity-80">
-                <li><Link href="/" className="hover:opacity-100">Bantuan</Link></li>
+                <li><Link href="/faq" className="hover:opacity-100">Bantuan</Link></li>
                 <li><Link href="/faq" className="hover:opacity-100">FAQ</Link></li>
-                <li><Link href="/" className="hover:opacity-100">Kebijakan Privasi</Link></li>
+                <li><Link href="/privacy" className="hover:opacity-100">Kebijakan Privasi</Link></li>
               </ul>
             </div>
 

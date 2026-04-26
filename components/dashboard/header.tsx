@@ -1,5 +1,8 @@
 "use client"
 
+import { useState } from "react"
+import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Bell, Search, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -20,6 +23,15 @@ interface HeaderProps {
 }
 
 export function Header({ title, description, onMenuClick }: HeaderProps) {
+  const router = useRouter()
+  const [searchQuery, setSearchQuery] = useState("")
+
+  const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const query = searchQuery.trim()
+    router.push(query ? `/dashboard/status?q=${encodeURIComponent(query)}` : "/dashboard/status")
+  }
+
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b bg-background px-6">
       <div className="flex items-center gap-4">
@@ -42,13 +54,15 @@ export function Header({ title, description, onMenuClick }: HeaderProps) {
 
       <div className="flex items-center gap-4">
         {/* Search */}
-        <div className="relative hidden md:block">
+        <form onSubmit={handleSearch} className="relative hidden md:block">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
-            placeholder="Cari data..."
+            placeholder="Cari nomor pengajuan..."
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
             className="w-64 pl-9"
           />
-        </div>
+        </form>
 
         {/* Notifications */}
         <DropdownMenu>
@@ -64,30 +78,35 @@ export function Header({ title, description, onMenuClick }: HeaderProps) {
           <DropdownMenuContent align="end" className="w-80">
             <DropdownMenuLabel>Notifikasi</DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="font-medium">Pengajuan KTP Baru</span>
-              <span className="text-xs text-muted-foreground">
-                5 pengajuan KTP baru menunggu verifikasi
-              </span>
-              <span className="text-xs text-muted-foreground">2 menit lalu</span>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/status?status=pending" className="flex flex-col items-start gap-1 p-3">
+                <span className="font-medium">Menunggu review</span>
+                <span className="text-xs text-muted-foreground">
+                  Cek pengajuan Anda yang masih menunggu pemeriksaan petugas.
+                </span>
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="font-medium">Perkawinan Disetujui</span>
-              <span className="text-xs text-muted-foreground">
-                Akta perkawinan No. 2026/PKW/001 telah disetujui
-              </span>
-              <span className="text-xs text-muted-foreground">1 jam lalu</span>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/status?status=verifying" className="flex flex-col items-start gap-1 p-3">
+                <span className="font-medium">Sedang diverifikasi</span>
+                <span className="text-xs text-muted-foreground">
+                  Pantau pengajuan yang sedang dalam proses verifikasi.
+                </span>
+              </Link>
             </DropdownMenuItem>
-            <DropdownMenuItem className="flex flex-col items-start gap-1 p-3">
-              <span className="font-medium">Laporan Bulanan</span>
-              <span className="text-xs text-muted-foreground">
-                Laporan IKD bulan Maret 2026 telah tersedia
-              </span>
-              <span className="text-xs text-muted-foreground">3 jam lalu</span>
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/status?status=rejected" className="flex flex-col items-start gap-1 p-3">
+                <span className="font-medium">Perlu perbaikan</span>
+                <span className="text-xs text-muted-foreground">
+                  Lihat pengajuan yang ditolak beserta catatan petugas.
+                </span>
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="justify-center text-primary">
-              Lihat semua notifikasi
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/status" className="justify-center text-primary">
+                Lihat semua notifikasi
+              </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

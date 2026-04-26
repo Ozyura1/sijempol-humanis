@@ -66,7 +66,6 @@ function createResourceRouter(collectionName) {
       }
     })
   })
-  })
 
   // POST create - Only users can submit
   router.post("/", requireRole("user"), validateSubmissionData, async (req, res) => {

@@ -9,10 +9,12 @@ import {
   Users,
   Heart,
   FileText,
-  Settings,
   LogOut,
   ChevronDown,
   Shield,
+  Baby,
+  MapPinned,
+  Home,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useAuth } from "@/contexts/auth-context"
@@ -31,16 +33,17 @@ const navigation = [
     icon: LayoutDashboard,
   },
   {
-    name: "Kependudukan",
+    name: "Layanan Kependudukan",
     icon: Users,
     children: [
-      { name: "Data KTP", href: "/dashboard/ktp" },
-      { name: "Pengajuan Baru", href: "/dashboard/ktp/pengajuan" },
-      { name: "Verifikasi", href: "/dashboard/ktp/verifikasi" },
+      { name: "Riwayat KTP Saya", href: "/dashboard/ktp" },
+      { name: "Pengajuan KTP", href: "/dashboard/ktp/pengajuan" },
+      { name: "Kartu Keluarga", href: "/dashboard/kk/pengajuan" },
+      { name: "Pindah Domisili", href: "/dashboard/pindah/pengajuan" },
     ],
   },
   {
-    name: "Pencatatan Sipil",
+    name: "Pencatatan Sipil Saya",
     icon: FileText,
     children: [
       { name: "Perkawinan", href: "/dashboard/perkawinan" },
@@ -49,29 +52,26 @@ const navigation = [
     ],
   },
   {
-    name: "IKD",
-    href: "/dashboard/ikd",
+    name: "Status Pengajuan",
+    href: "/dashboard/status",
     icon: CreditCard,
   },
   {
-    name: "Laporan",
+    name: "Laporan Saya",
     href: "/dashboard/laporan",
     icon: FileText,
   },
-]
-
-const adminNavigation = [
   {
-    name: "Pengaturan",
-    href: "/dashboard/pengaturan",
-    icon: Settings,
+    name: "Profil",
+    href: "/dashboard/profile",
+    icon: Shield,
   },
 ]
 
 export function Sidebar() {
   const pathname = usePathname()
   const { user, logout } = useAuth()
-  const [openItems, setOpenItems] = useState<string[]>(["Kependudukan", "Pencatatan Sipil"])
+  const [openItems, setOpenItems] = useState<string[]>(["Layanan Kependudukan", "Pencatatan Sipil Saya"])
 
   const toggleItem = (name: string) => {
     setOpenItems((prev) =>
@@ -161,28 +161,30 @@ export function Sidebar() {
           )
         )}
 
-        {user?.role === "admin" && (
-          <>
-            <div className="mb-2 mt-6 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
-              Administrasi
-            </div>
-            {adminNavigation.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
-                  pathname === item.href
-                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                    : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                )}
-              >
-                <item.icon className="h-5 w-5" />
-                {item.name}
-              </Link>
-            ))}
-          </>
-        )}
+        <div className="mb-2 mt-6 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+          Pengajuan Cepat
+        </div>
+        <Link
+          href="/dashboard/kelahiran/pengajuan"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <Baby className="h-5 w-5" />
+          Akta Kelahiran
+        </Link>
+        <Link
+          href="/dashboard/pindah/pengajuan"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <MapPinned className="h-5 w-5" />
+          Pindah Domisili
+        </Link>
+        <Link
+          href="/dashboard/kk/pengajuan"
+          className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+        >
+          <Home className="h-5 w-5" />
+          Kartu Keluarga
+        </Link>
       </nav>
 
       {/* User Section */}
