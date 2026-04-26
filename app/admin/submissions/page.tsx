@@ -250,7 +250,9 @@ export default function AdminSubmissionsPage() {
                 <tbody className="divide-y">
                   {paginated.data.map((submission) => (
                     <tr key={submission.id} className="hover:bg-gray-50 transition">
-                      <td className="px-6 py-4 text-sm font-mono">{submission.id.substring(0, 8).toUpperCase()}</td>
+                      <td className="px-6 py-4 text-sm font-mono">
+                        {String(submission.id).substring(0, 8).toUpperCase()}
+                      </td>
                       <td className="px-6 py-4 text-sm font-medium">{submission.serviceLabel}</td>
                       <td className="px-6 py-4 text-sm">{submission.applicant_name}</td>
                       <td className="px-6 py-4 text-sm">
