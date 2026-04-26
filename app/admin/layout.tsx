@@ -4,13 +4,14 @@ import { useEffect, useState, ReactNode } from "react"
 import { useRouter, usePathname } from "next/navigation"
 import { Sidebar } from "@/components/dashboard/sidebar"
 import { Header } from "@/components/dashboard/header"
+import { useAuth } from "@/contexts/auth-context"
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter()
   const pathname = usePathname()
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [loading, setLoading] = useState(true)
-  const [adminUser, setAdminUser] = useState<any>(null)
+  const { isAuthenticated, user, isLoading: authLoading } = useAuth()
 
   // Skip auth check for login page
   const isLoginPage = pathname === "/admin/login"
@@ -21,36 +22,23 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       return
     }
 
-    // Check if user is logged in as admin
-    const adminToken = localStorage.getItem("admin_access_token")
-    const adminUserData = localStorage.getItem("admin_user")
+    // Wait until AuthProvider finishes hydrating from localStorage.
+    if (authLoading) {
+      setLoading(true)
+      return
+    }
 
-    if (!adminToken) {
-      // Redirect to admin login if not authenticated
+    // Check if user is logged in as admin (single source of truth: AuthContext).
+    if (!isAuthenticated || user?.role !== "admin") {
+      setIsAuthorized(false)
+      setLoading(false)
       router.push("/admin/login")
       return
     }
 
-    if (adminUserData) {
-      try {
-        const user = JSON.parse(adminUserData)
-        if (user.role === "admin") {
-          setAdminUser(user)
-          setIsAuthorized(true)
-        } else {
-          // User is not admin, redirect
-          localStorage.removeItem("admin_access_token")
-          localStorage.removeItem("admin_refresh_token")
-          localStorage.removeItem("admin_user")
-          router.push("/admin/login")
-        }
-      } catch {
-        router.push("/admin/login")
-      }
-    }
-
+    setIsAuthorized(true)
     setLoading(false)
-  }, [router, pathname, isLoginPage])
+  }, [router, isLoginPage, authLoading, isAuthenticated, user?.role])
 
   // For login page, no layout
   if (isLoginPage) {
@@ -70,13 +58,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
   if (!isAuthorized) {
     return null // Will redirect in useEffect
-  }
-
-  const handleLogout = () => {
-    localStorage.removeItem("admin_access_token")
-    localStorage.removeItem("admin_refresh_token")
-    localStorage.removeItem("admin_user")
-    router.push("/admin/login")
   }
 
   return (

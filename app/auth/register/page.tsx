@@ -74,7 +74,7 @@ export default function RegisterPage() {
       }
 
       // Redirect to login page
-      router.push("/login?registered=true")
+      router.push("/auth/login?registered=true")
     } catch (err) {
       setError("Koneksi gagal. Silakan coba lagi.")
     } finally {
@@ -185,7 +185,7 @@ export default function RegisterPage() {
 
             <div className="text-center text-sm">
               Sudah punya akun?{" "}
-              <Link href="/login" className="text-primary hover:underline font-medium">
+              <Link href="/auth/login" className="text-primary hover:underline font-medium">
                 Masuk di sini
               </Link>
             </div>

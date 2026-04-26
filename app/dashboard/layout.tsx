@@ -20,7 +20,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (mounted && !isLoading) {
       if (!isAuthenticated) {
-        router.push("/login")
+        router.push("/auth/login")
       } else if (user?.role === "admin") {
         // Admins should not access user dashboard
         router.push("/admin/dashboard")

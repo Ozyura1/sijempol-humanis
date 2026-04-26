@@ -9,15 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Spinner } from "@/components/ui/spinner"
 import { useAuth } from "@/contexts/auth-context"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
-
 export default function AdminLoginPage() {
   const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
-  const { isAuthenticated, user } = useAuth()
+  const { isAuthenticated, user, login } = useAuth()
 
   // Check if admin is already logged in
   useEffect(() => {
@@ -38,43 +36,37 @@ export default function AdminLoginPage() {
     setLoading(true)
 
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-      })
+      const result = await login(username, password)
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        setError(data.message || "Login gagal")
+      if (!result.success) {
+        setError(result.message || "Login gagal")
+        setLoading(false)
         return
       }
 
-      const { user, access_token, refresh_token } = data
-
-      // Verify user has admin role
-      if (user.role !== "admin") {
-        setError("Akun ini tidak memiliki akses admin")
-        return
+      // Check if user has admin role
+      // Need to get user from localStorage since context state updates async
+      const userStr = localStorage.getItem("user")
+      if (userStr) {
+        const userData = JSON.parse(userStr)
+        if (userData.role !== "admin") {
+          setError("Akun ini tidak memiliki akses admin")
+          // Logout if not admin
+          localStorage.removeItem("access_token")
+          localStorage.removeItem("refresh_token")
+          localStorage.removeItem("user")
+          setLoading(false)
+          return
+        }
       }
 
-      // Store in unified localStorage (same as regular users)
-      localStorage.setItem("access_token", access_token)
-      if (refresh_token) {
-        localStorage.setItem("refresh_token", refresh_token)
-      }
-      localStorage.setItem("user", JSON.stringify(user))
-
-      router.push("/admin/dashboard")
+      // Redirect will happen via useEffect after state updates
+      // Give a small delay for state to update
+      setTimeout(() => {
+        router.push("/admin/dashboard")
+      }, 100)
     } catch (err) {
       setError("Koneksi gagal. Silakan coba lagi.")
-    } finally {
       setLoading(false)
     }
   }

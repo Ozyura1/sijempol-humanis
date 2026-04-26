@@ -33,7 +33,7 @@ export default function ProfilePage() {
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== "user") {
-      router.push("/dashboard/login")
+      router.push("/auth/login")
       return
     }
 
@@ -147,7 +147,7 @@ export default function ProfilePage() {
 
   const handleLogout = () => {
     logout()
-    router.push("/dashboard/login")
+    router.push("/auth/login")
   }
 
   if (!isAuthenticated || user?.role !== "user") {

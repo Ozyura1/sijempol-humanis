@@ -27,12 +27,14 @@ import {
   formatDate,
   getServiceApiEndpoint,
 } from "@/lib/submission-utils"
+import { useAuth } from "@/contexts/auth-context"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function AdminSubmissionDetailPage() {
   const router = useRouter()
   const params = useParams()
+  const { isAuthenticated, user, accessToken } = useAuth()
   const [submission, setSubmission] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [actionLoading, setActionLoading] = useState(false)
@@ -44,8 +46,7 @@ export default function AdminSubmissionDetailPage() {
   const id = params.id as string
 
   useEffect(() => {
-    const adminToken = localStorage.getItem("admin_access_token")
-    if (!adminToken) {
+    if (!isAuthenticated || user?.role !== "admin" || !accessToken) {
       router.push("/admin/login")
       return
     }
@@ -53,18 +54,17 @@ export default function AdminSubmissionDetailPage() {
     if (service && id) {
       fetchSubmission()
     }
-  }, [service, id])
+  }, [service, id, isAuthenticated, user?.role, accessToken])
 
   const fetchSubmission = async () => {
     try {
       setLoading(true)
       setError("")
-      const token = localStorage.getItem("admin_access_token")
       const endpoint = getServiceApiEndpoint(service)
 
       const response = await fetch(`${API_URL}/${endpoint}/${id}`, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
       })
 
@@ -87,7 +87,6 @@ export default function AdminSubmissionDetailPage() {
     try {
       setActionLoading(true)
       setError("")
-      const token = localStorage.getItem("admin_access_token")
       const endpoint = getServiceApiEndpoint(service)
 
       let url = `${API_URL}/${endpoint}/${id}/status`
@@ -103,7 +102,7 @@ export default function AdminSubmissionDetailPage() {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify(body),
       })

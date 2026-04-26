@@ -46,7 +46,7 @@ export default function SubmissionsPage() {
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== "user") {
-      router.push("/dashboard/login")
+      router.push("/auth/login")
       return
     }
 
