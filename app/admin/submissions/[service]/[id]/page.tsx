@@ -28,6 +28,7 @@ import {
   getServiceApiEndpoint,
 } from "@/lib/submission-utils"
 import { useAuth } from "@/contexts/auth-context"
+import { readApiErrorMessage } from "@/lib/api-response"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
@@ -90,7 +91,7 @@ export default function AdminSubmissionDetailPage() {
       const endpoint = getServiceApiEndpoint(service)
 
       let url = `${API_URL}/${endpoint}/${id}/status`
-      const body: any = { status: newStatus }
+      const body: any = { new_status: newStatus }
 
       // If rejecting, use the reject endpoint
       if (newStatus === "rejected") {
@@ -108,8 +109,7 @@ export default function AdminSubmissionDetailPage() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.message || "Gagal mengubah status")
+        throw new Error(await readApiErrorMessage(response, "Gagal mengubah status"))
       }
 
       const updated = await response.json()
