@@ -1,15 +1,24 @@
 import express from "express"
 import bcrypt from "bcryptjs"
 import db, { nextId } from "../db.js"
-import { generateToken, authenticate } from "./authMiddleware.js"
+import { generateTokens, generateToken, authenticate, blacklistToken, verifyRefreshToken } from "./authMiddleware.js"
+import { validateBody, validatePassword, validateEmail } from "../middleware/validation.js"
 
 const router = express.Router()
 
-router.post("/register", async (req, res) => {
+router.post("/register", validateEmail, async (req, res) => {
   const { username, password, name, email } = req.body
 
   if (!username || !password) {
     return res.status(400).json({ message: "Username dan password wajib diisi." })
+  }
+
+  if (username.length < 3) {
+    return res.status(400).json({ message: "Username minimal 3 karakter." })
+  }
+
+  if (password.length < 6) {
+    return res.status(400).json({ message: "Password minimal 6 karakter." })
   }
 
   await db.read()
@@ -48,14 +57,22 @@ router.post("/login", async (req, res) => {
     return res.status(401).json({ message: "Username atau password salah." })
   }
 
-  const token = generateToken(user)
+  const { accessToken, refreshToken } = generateTokens(user)
   return res.json({
-    access_token: token,
+    access_token: accessToken,
+    refresh_token: refreshToken,
     user: { id: user.id, username: user.username, name: user.name, email: user.email, role: user.role },
   })
 })
 
 router.post("/logout", authenticate, (req, res) => {
+  const authHeader = req.headers.authorization || ""
+  const token = authHeader.replace(/^Bearer\s+/i, "")
+  
+  if (token) {
+    blacklistToken(token)
+  }
+  
   return res.json({ message: "Logout sukses." })
 })
 
@@ -91,7 +108,7 @@ router.put("/profile", authenticate, async (req, res) => {
   })
 })
 
-router.put("/change-password", authenticate, async (req, res) => {
+router.put("/change-password", authenticate, validatePassword, async (req, res) => {
   const { oldPassword, newPassword } = req.body
 
   if (!oldPassword || !newPassword) {
@@ -117,6 +134,33 @@ router.put("/change-password", authenticate, async (req, res) => {
   await db.write()
 
   return res.json({ message: "Password berhasil diubah." })
+})
+
+router.post("/refresh", (req, res) => {
+  const { refresh_token } = req.body
+
+  if (!refresh_token) {
+    return res.status(400).json({ message: "Refresh token diperlukan." })
+  }
+
+  const payload = verifyRefreshToken(refresh_token)
+  if (!payload) {
+    return res.status(401).json({ message: "Refresh token tidak valid atau telah kadaluarsa." })
+  }
+
+  db.read().then(() => {
+    const user = db.data.users.find((item) => item.id === payload.id)
+    if (!user) {
+      return res.status(404).json({ message: "User tidak ditemukan." })
+    }
+
+    const { accessToken, refreshToken } = generateTokens(user)
+    return res.json({
+      access_token: accessToken,
+      refresh_token: refreshToken,
+      user: { id: user.id, username: user.username, name: user.name, email: user.email, role: user.role },
+    })
+  })
 })
 
 export default router

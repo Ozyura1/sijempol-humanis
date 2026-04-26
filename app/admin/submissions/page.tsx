@@ -12,11 +12,13 @@ import { Input } from "@/components/ui/input"
 import { AlertCircle, Eye, Loader2, ChevronRight } from "lucide-react"
 import { getStatusBadgeColor, getStatusLabel, getServiceLabel, formatDate, getServiceApiEndpoint } from "@/lib/submission-utils"
 import { calculateAdminStats, filterSubmissions, sortSubmissions, paginateSubmissions } from "@/lib/admin-utils"
+import { useAuth } from "@/contexts/auth-context"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function AdminSubmissionsPage() {
   const router = useRouter()
+  const { isAuthenticated, user, accessToken } = useAuth()
   const [submissions, setSubmissions] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
@@ -38,28 +40,26 @@ export default function AdminSubmissionsPage() {
   ]
 
   useEffect(() => {
-    const adminToken = localStorage.getItem("admin_access_token")
-    if (!adminToken) {
+    if (!isAuthenticated || user?.role !== "admin") {
       router.push("/admin/login")
       return
     }
 
     fetchAllSubmissions()
-  }, [])
+  }, [isAuthenticated, user, router])
 
   const fetchAllSubmissions = async () => {
     try {
       setLoading(true)
       setError("")
-      const token = localStorage.getItem("admin_access_token")
 
       let allSubmissions: any[] = []
 
       for (const service of services) {
         try {
-          const response = await fetch(`${API_URL}/${service.value}`, {
+          const response = await fetch(`${API_URL}/${service.value}?limit=100`, {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${accessToken}`,
             },
           })
 

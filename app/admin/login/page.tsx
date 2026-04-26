@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
+import { useAuth } from "@/contexts/auth-context"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
@@ -16,14 +17,14 @@ export default function AdminLoginPage() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { isAuthenticated, user } = useAuth()
 
   // Check if admin is already logged in
   useEffect(() => {
-    const adminAuth = localStorage.getItem("admin_access_token")
-    if (adminAuth) {
+    if (isAuthenticated && user?.role === "admin") {
       router.push("/admin/dashboard")
     }
-  }, [router])
+  }, [isAuthenticated, user, router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,12 +64,12 @@ export default function AdminLoginPage() {
         return
       }
 
-      // Store admin tokens in localStorage
-      localStorage.setItem("admin_access_token", access_token)
+      // Store in unified localStorage (same as regular users)
+      localStorage.setItem("access_token", access_token)
       if (refresh_token) {
-        localStorage.setItem("admin_refresh_token", refresh_token)
+        localStorage.setItem("refresh_token", refresh_token)
       }
-      localStorage.setItem("admin_user", JSON.stringify(user))
+      localStorage.setItem("user", JSON.stringify(user))
 
       router.push("/admin/dashboard")
     } catch (err) {
@@ -136,7 +137,7 @@ export default function AdminLoginPage() {
               <div className="text-sm text-muted-foreground mb-3">
                 <p>
                   Bukan admin?{" "}
-                  <Link href="/login" className="text-primary hover:underline font-medium">
+                  <Link href="/auth/login" className="text-primary hover:underline font-medium">
                     Login sebagai user
                   </Link>
                 </p>

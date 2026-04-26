@@ -10,12 +10,13 @@ import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle, LogOut, Eye, TrendingUp, Clock, CheckCircle, XCircle } from "lucide-react"
 import { getStatusBadgeColor, getStatusLabel, getServiceLabel, formatDate, getServiceApiEndpoint } from "@/lib/submission-utils"
 import { calculateAdminStats } from "@/lib/admin-utils"
+import { useAuth } from "@/contexts/auth-context"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export default function AdminDashboardPage() {
   const router = useRouter()
-  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const { isAuthenticated, user, logout, accessToken } = useAuth()
   const [isLoading, setIsLoading] = useState(true)
   const [submissions, setSubmissions] = useState<any[]>([])
   const [stats, setStats] = useState<any>(null)
@@ -32,26 +33,23 @@ export default function AdminDashboardPage() {
 
   // Check auth
   useEffect(() => {
-    const adminToken = localStorage.getItem("admin_access_token")
-    if (!adminToken) {
+    if (!isAuthenticated || user?.role !== "admin") {
       router.push("/admin/login")
     } else {
-      setIsAuthenticated(true)
+      setIsLoading(false)
       fetchSubmissions()
     }
-    setIsLoading(false)
-  }, [router])
+  }, [isAuthenticated, user, router])
 
   const fetchSubmissions = async () => {
     try {
-      const token = localStorage.getItem("admin_access_token")
       let allSubmissions: any[] = []
 
       for (const service of services) {
         try {
-          const response = await fetch(`${API_URL}/${service.value}`, {
+          const response = await fetch(`${API_URL}/${service.value}?limit=100`, {
             headers: {
-              Authorization: `Bearer ${token}`,
+              Authorization: `Bearer ${accessToken}`,
             },
           })
 
@@ -71,17 +69,15 @@ export default function AdminDashboardPage() {
 
       // Sort by date descending and get recent 10
       allSubmissions.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-      setSubmissions(allSubmissions)
+      setSubmissions(allSubmissions.slice(0, 10))
       setStats(calculateAdminStats(allSubmissions))
     } catch (err: any) {
       setError(err.message || "Gagal memuat data")
     }
   }
 
-  const handleLogout = () => {
-    localStorage.removeItem("admin_access_token")
-    localStorage.removeItem("admin_refresh_token")
-    localStorage.removeItem("admin_user")
+  const handleLogout = async () => {
+    await logout()
     router.push("/admin/login")
   }
 

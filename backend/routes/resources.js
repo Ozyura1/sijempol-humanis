@@ -2,6 +2,7 @@ import express from "express"
 import db, { nextId } from "../db.js"
 import { authenticate } from "./authMiddleware.js"
 import { requireRole } from "../middleware/roleGuard.js"
+import { validateSubmissionData, validateStatusChange } from "../middleware/validation.js"
 
 const allowedResources = [
   "id_cards",
@@ -47,15 +48,29 @@ function createResourceRouter(collectionName) {
     
     // Sort by created_at descending
     list = list.sort((a, b) => (a.created_at < b.created_at ? 1 : -1))
-    res.json(list)
+    
+    // Pagination
+    const page = Math.max(1, parseInt(req.query.page || "1", 10))
+    const limit = Math.min(100, parseInt(req.query.limit || "10", 10))
+    const offset = (page - 1) * limit
+    const total = list.length
+    const paginatedList = list.slice(offset, offset + limit)
+    
+    res.json({
+      data: paginatedList,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      }
+    })
+  })
   })
 
   // POST create - Only users can submit
-  router.post("/", requireRole("user"), async (req, res) => {
+  router.post("/", requireRole("user"), validateSubmissionData, async (req, res) => {
     const { applicant_name, data, documents } = req.body
-    if (!applicant_name) {
-      return res.status(400).json({ message: "applicant_name wajib diisi." })
-    }
 
     await db.read()
     const item = {
@@ -144,11 +159,8 @@ function createResourceRouter(collectionName) {
   })
 
   // PUT status transition - Only admins
-  router.put("/:id/status", requireRole("admin"), async (req, res) => {
+  router.put("/:id/status", requireRole("admin"), validateStatusChange, async (req, res) => {
     const { new_status } = req.body
-    if (!new_status) {
-      return res.status(400).json({ message: "new_status wajib diisi" })
-    }
 
     await db.read()
     const index = db.data[collectionName].findIndex((record) => record.id === Number(req.params.id))

@@ -79,3 +79,164 @@ export function getServiceApiEndpoint(serviceName: string) {
   }
   return endpoints[serviceName] || serviceName
 }
+
+// API Fetch functions
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+
+export async function fetchSubmissions(serviceName: string, page = 1, limit = 10) {
+  const endpoint = getServiceApiEndpoint(serviceName)
+  const accessToken = localStorage.getItem("access_token")
+
+  if (!accessToken) {
+    throw new Error("User tidak terautentikasi")
+  }
+
+  const response = await fetch(`${API_URL}/${endpoint}?page=${page}&limit=${limit}`, {
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  })
+
+  if (!response.ok) {
+    if (response.status === 401) {
+      throw new Error("Token kadaluarsa, silakan login kembali")
+    }
+    throw new Error("Gagal mengambil data")
+  }
+
+  return await response.json()
+}
+
+export async function fetchSubmissionById(serviceName: string, id: number) {
+  const endpoint = getServiceApiEndpoint(serviceName)
+  const accessToken = localStorage.getItem("access_token")
+
+  if (!accessToken) {
+    throw new Error("User tidak terautentikasi")
+  }
+
+  const response = await fetch(`${API_URL}/${endpoint}/${id}`, {
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  })
+
+  if (!response.ok) {
+    throw new Error("Data tidak ditemukan")
+  }
+
+  return await response.json()
+}
+
+export async function submitService(serviceName: string, data: any) {
+  const endpoint = getServiceApiEndpoint(serviceName)
+  const accessToken = localStorage.getItem("access_token")
+
+  if (!accessToken) {
+    throw new Error("User tidak terautentikasi")
+  }
+
+  const response = await fetch(`${API_URL}/${endpoint}`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || "Gagal mengirim data")
+  }
+
+  return await response.json()
+}
+
+export async function updateSubmission(serviceName: string, id: number, data: any) {
+  const endpoint = getServiceApiEndpoint(serviceName)
+  const accessToken = localStorage.getItem("access_token")
+
+  if (!accessToken) {
+    throw new Error("User tidak terautentikasi")
+  }
+
+  const response = await fetch(`${API_URL}/${endpoint}/${id}`, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || "Gagal mengubah data")
+  }
+
+  return await response.json()
+}
+
+export async function deleteSubmission(serviceName: string, id: number) {
+  const endpoint = getServiceApiEndpoint(serviceName)
+  const accessToken = localStorage.getItem("access_token")
+
+  if (!accessToken) {
+    throw new Error("User tidak terautentikasi")
+  }
+
+  const response = await fetch(`${API_URL}/${endpoint}/${id}`, {
+    method: "DELETE",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || "Gagal menghapus data")
+  }
+
+  return await response.json()
+}
+
+export async function updateSubmissionStatus(serviceName: string, id: number, newStatus: string, rejectionReason?: string) {
+  const endpoint = getServiceApiEndpoint(serviceName)
+  const accessToken = localStorage.getItem("access_token")
+
+  if (!accessToken) {
+    throw new Error("User tidak terautentikasi")
+  }
+
+  if (newStatus === "rejected" && !rejectionReason) {
+    throw new Error("Alasan penolakan wajib diisi")
+  }
+
+  const url = newStatus === "rejected" 
+    ? `${API_URL}/${endpoint}/${id}/reject`
+    : `${API_URL}/${endpoint}/${id}/status`
+
+  const body = newStatus === "rejected"
+    ? { rejection_reason: rejectionReason }
+    : { new_status: newStatus }
+
+  const response = await fetch(url, {
+    method: "PUT",
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(body),
+  })
+
+  if (!response.ok) {
+    const error = await response.json()
+    throw new Error(error.message || "Gagal mengubah status")
+  }
+
+  return await response.json()
+}

@@ -5,8 +5,9 @@ import type { User, AuthState } from "@/types"
 
 interface AuthContextType extends AuthState {
   login: (username: string, password: string) => Promise<{ success: boolean; message?: string }>
-  logout: () => void
+  logout: () => Promise<void>
   isLoading: boolean
+  refreshAccessToken: () => Promise<boolean>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -47,6 +48,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false)
   }, [])
 
+  const refreshAccessToken = useCallback(async (): Promise<boolean> => {
+    const refreshToken = localStorage.getItem("refresh_token")
+    if (!refreshToken) {
+      return false
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/auth/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refresh_token: refreshToken }),
+      })
+
+      if (!response.ok) {
+        // Refresh failed, logout user
+        logout()
+        return false
+      }
+
+      const data = await response.json()
+      const newAccessToken = data.access_token
+      const newRefreshToken = data.refresh_token
+      const user = data.user
+
+      localStorage.setItem("access_token", newAccessToken)
+      localStorage.setItem("refresh_token", newRefreshToken)
+      localStorage.setItem("user", JSON.stringify(user))
+
+      setState({
+        user,
+        accessToken: newAccessToken,
+        refreshToken: newRefreshToken,
+        isAuthenticated: true,
+      })
+
+      return true
+    } catch (error) {
+      console.error("Token refresh failed:", error)
+      return false
+    }
+  }, [])
+
   const login = useCallback(async (username: string, password: string) => {
     setIsLoading(true)
     try {
@@ -66,9 +109,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, message: data.message || "Login gagal" }
       }
 
-      const accessToken = data.access_token || data.data?.access_token
-      const refreshToken = data.refresh_token || data.data?.refresh_token
-      const user = data.user || data.data?.user
+      const accessToken = data.access_token
+      const refreshToken = data.refresh_token
+      const user = data.user
 
       localStorage.setItem("access_token", accessToken)
       localStorage.setItem("refresh_token", refreshToken)
@@ -89,10 +132,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const logout = useCallback(() => {
+  const logout = useCallback(async () => {
+    const accessToken = localStorage.getItem("access_token")
+    
+    // Notify backend about logout
+    if (accessToken) {
+      try {
+        await fetch(`${API_URL}/auth/logout`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${accessToken}`,
+          },
+        })
+      } catch (error) {
+        console.error("Logout request failed:", error)
+      }
+    }
+
     localStorage.removeItem("access_token")
     localStorage.removeItem("refresh_token")
     localStorage.removeItem("user")
+    
+    // Also remove admin tokens if they exist (for backward compatibility)
+    localStorage.removeItem("admin_access_token")
+    localStorage.removeItem("admin_refresh_token")
+    localStorage.removeItem("admin_user")
+    
     setState({
       user: null,
       accessToken: null,
@@ -102,7 +168,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, isLoading }}>
+    <AuthContext.Provider value={{ ...state, login, logout, isLoading, refreshAccessToken }}>
       {children}
     </AuthContext.Provider>
   )
