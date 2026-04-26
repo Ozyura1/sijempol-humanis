@@ -17,30 +17,62 @@ const app = express()
 const port = process.env.PORT || 8000
 
 // Configure CORS
-const allowedOrigins = [
+const explicitOrigins = [
   "http://localhost:3000",
   "http://127.0.0.1:3000",
+  "https://sijempolhumanis.web.id",
+  "https://www.sijempolhumanis.web.id",
   process.env.FRONTEND_URL,
+  process.env.ADMIN_FRONTEND_URL,
+  ...(process.env.ALLOWED_ORIGINS || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean),
 ].filter(Boolean)
 
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (mobile, curl, etc)
-    if (!origin) return callback(null, true)
-    
-    if (allowedOrigins.includes(origin)) {
-      callback(null, true)
-    } else {
-      callback(new Error("CORS not allowed"))
+function isAllowedOrigin(origin) {
+  if (!origin) return true
+
+  if (explicitOrigins.includes(origin)) {
+    return true
+  }
+
+  try {
+    const parsed = new URL(origin)
+    const hostname = parsed.hostname
+
+    if (hostname === "sijempolhumanis.web.id" || hostname.endsWith(".sijempolhumanis.web.id")) {
+      return true
     }
+
+    if (hostname === "localhost" || hostname === "127.0.0.1") {
+      return true
+    }
+  } catch {
+    return false
+  }
+
+  return false
+}
+
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (isAllowedOrigin(origin)) {
+      return callback(null, true)
+    }
+
+    return callback(new Error(`CORS not allowed for origin: ${origin || "unknown"}`))
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
-}))
+}
 
-app.use(express.json({ limit: "25mb" }))
-app.use(express.urlencoded({ extended: true, limit: "25mb" }))
+app.use(cors(corsOptions))
+app.options("*", cors(corsOptions))
+
+app.use(express.json({ limit: "50mb" }))
+app.use(express.urlencoded({ extended: true, limit: "50mb" }))
 app.use(cookieParser())
 
 app.get("/", (req, res) => {
@@ -58,6 +90,17 @@ app.use("/api/deaths", resourceRoutes("deaths"))
 app.use("/api/marriages", resourceRoutes("marriages"))
 app.use("/api/moves", resourceRoutes("moves"))
 app.use("/api/family-cards", resourceRoutes("family_cards"))
+
+app.use((err, req, res, next) => {
+  if (err?.type === "entity.too.large" || err?.status === 413) {
+    return res.status(413).json({
+      message:
+        "Ukuran file terlalu besar untuk diproses. Silakan kecilkan file atau gunakan file dengan resolusi lebih rendah.",
+    })
+  }
+
+  return next(err)
+})
 
 // Seed admin user on startup
 async function seedAdminUser() {
