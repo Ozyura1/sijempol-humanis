@@ -4,6 +4,7 @@ import { SubmissionForm } from "@/components/forms/submission-form"
 import { useAuth } from "@/contexts/auth-context"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
+import { readApiErrorMessage } from "@/lib/api-response"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
@@ -231,10 +232,9 @@ export default function KTPPengajuanPage() {
       })
 
       if (!response.ok) {
-        const error = await response.json()
         return {
           success: false,
-          message: error.message || "Gagal mengirim pengajuan",
+          message: await readApiErrorMessage(response, "Gagal mengirim pengajuan"),
         }
       }
 
