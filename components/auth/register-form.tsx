@@ -5,10 +5,20 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { CardContent } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
+import { PasswordInput } from "@/components/auth/password-input"
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+
+async function readApiMessage(response: Response) {
+  try {
+    const data = await response.json()
+    return typeof data?.message === "string" ? data.message : null
+  } catch {
+    return null
+  }
+}
 
 export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   const [formData, setFormData] = useState({
@@ -34,7 +44,6 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
     e.preventDefault()
     setError("")
 
-    // Validation
     if (!formData.username || !formData.email || !formData.name || !formData.password) {
       setError("Semua field wajib diisi")
       return
@@ -66,19 +75,19 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
         }),
       })
 
-      const data = await response.json()
-
       if (!response.ok) {
-        setError(data.message || "Pendaftaran gagal")
-        setLoading(false)
+        const message = await readApiMessage(response)
+        setError(message || "Pendaftaran gagal")
         return
       }
 
       onSuccess?.()
-      // Redirect to login modal
       router.push("/?login=true")
-    } catch (err: any) {
-      setError(err.message || "Terjadi kesalahan saat mendaftar")
+    } catch {
+      setError(
+        `Tidak bisa terhubung ke server register. Pastikan backend berjalan dan dapat diakses di ${API_URL}.`
+      )
+    } finally {
       setLoading(false)
     }
   }
@@ -86,11 +95,7 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
   return (
     <CardContent className="pt-6">
       <form onSubmit={handleRegister} className="space-y-4">
-        {error && (
-          <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">
-            {error}
-          </div>
-        )}
+        {error && <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">{error}</div>}
 
         <div>
           <label htmlFor="name" className="block text-sm font-medium mb-2">
@@ -140,37 +145,25 @@ export function RegisterForm({ onSuccess }: { onSuccess?: () => void }) {
           />
         </div>
 
-        <div>
-          <label htmlFor="password" className="block text-sm font-medium mb-2">
-            Password
-          </label>
-          <Input
-            id="password"
-            type="password"
-            name="password"
-            placeholder="••••••••"
-            value={formData.password}
-            onChange={handleChange}
-            disabled={loading}
-            required
-          />
-        </div>
+        <PasswordInput
+          id="password"
+          name="password"
+          label="Password"
+          value={formData.password}
+          onChange={handleChange}
+          disabled={loading}
+          required
+        />
 
-        <div>
-          <label htmlFor="confirmPassword" className="block text-sm font-medium mb-2">
-            Konfirmasi Password
-          </label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            name="confirmPassword"
-            placeholder="••••••••"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            disabled={loading}
-            required
-          />
-        </div>
+        <PasswordInput
+          id="confirmPassword"
+          name="confirmPassword"
+          label="Konfirmasi Password"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          disabled={loading}
+          required
+        />
 
         <Button type="submit" className="w-full" disabled={loading} size="lg">
           {loading ? (

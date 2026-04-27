@@ -45,7 +45,13 @@ function isAllowedOrigin(origin) {
       return true
     }
 
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
+    if (
+      hostname === "localhost" ||
+      hostname === "127.0.0.1" ||
+      hostname.endsWith(".localhost") ||
+      hostname.endsWith(".test") ||
+      hostname.endsWith(".local")
+    ) {
       return true
     }
   } catch {

@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
+import { PasswordInput } from "@/components/auth/password-input"
 import { useAuth } from "@/contexts/auth-context"
 
 export default function AdminLoginPage() {
@@ -17,7 +18,6 @@ export default function AdminLoginPage() {
   const router = useRouter()
   const { isAuthenticated, user, login } = useAuth()
 
-  // Check if admin is already logged in
   useEffect(() => {
     if (isAuthenticated && user?.role === "admin") {
       router.push("/admin/dashboard")
@@ -40,33 +40,27 @@ export default function AdminLoginPage() {
 
       if (!result.success) {
         setError(result.message || "Login gagal")
-        setLoading(false)
         return
       }
 
-      // Check if user has admin role
-      // Need to get user from localStorage since context state updates async
       const userStr = localStorage.getItem("user")
       if (userStr) {
         const userData = JSON.parse(userStr)
         if (userData.role !== "admin") {
           setError("Akun ini tidak memiliki akses admin")
-          // Logout if not admin
           localStorage.removeItem("access_token")
           localStorage.removeItem("refresh_token")
           localStorage.removeItem("user")
-          setLoading(false)
           return
         }
       }
 
-      // Redirect will happen via useEffect after state updates
-      // Give a small delay for state to update
       setTimeout(() => {
         router.push("/admin/dashboard")
       }, 100)
-    } catch (err) {
+    } catch {
       setError("Koneksi gagal. Silakan coba lagi.")
+    } finally {
       setLoading(false)
     }
   }
@@ -80,11 +74,7 @@ export default function AdminLoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
-            {error && (
-              <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">
-                {error}
-              </div>
-            )}
+            {error && <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">{error}</div>}
 
             <div>
               <label htmlFor="username" className="block text-sm font-medium mb-2">
@@ -100,19 +90,14 @@ export default function AdminLoginPage() {
               />
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium mb-2">
-                Password
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                disabled={loading}
-              />
-            </div>
+            <PasswordInput
+              id="password"
+              name="password"
+              label="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={loading}
+            />
 
             <Button type="submit" className="w-full" disabled={loading} size="lg">
               {loading ? (

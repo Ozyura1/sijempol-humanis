@@ -1,13 +1,14 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useEffect, useState } from "react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Spinner } from "@/components/ui/spinner"
+import { PasswordInput } from "@/components/auth/password-input"
 import { useAuth } from "@/contexts/auth-context"
-import Link from "next/link"
 
 export function UserLoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const [username, setUsername] = useState("")
@@ -18,7 +19,6 @@ export function UserLoginForm({ onSuccess }: { onSuccess?: () => void }) {
   const { login, isAuthenticated, user } = useAuth()
 
   useEffect(() => {
-    // If already authenticated and is user, redirect to dashboard
     if (isAuthenticated && user?.role === "user") {
       onSuccess?.()
       router.push("/dashboard")
@@ -43,7 +43,6 @@ export function UserLoginForm({ onSuccess }: { onSuccess?: () => void }) {
       return
     }
 
-    // Login will update context, redirect handled by useEffect
     router.push("/dashboard")
   }
 
@@ -55,11 +54,7 @@ export function UserLoginForm({ onSuccess }: { onSuccess?: () => void }) {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleLogin} className="space-y-4">
-          {error && (
-            <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">
-              {error}
-            </div>
-          )}
+          {error && <div className="p-3 bg-red-50 text-red-700 rounded-md text-sm">{error}</div>}
 
           <div>
             <label htmlFor="username" className="block text-sm font-medium mb-2">
@@ -75,19 +70,14 @@ export function UserLoginForm({ onSuccess }: { onSuccess?: () => void }) {
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium mb-2">
-              Password
-            </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              disabled={loading}
-            />
-          </div>
+          <PasswordInput
+            id="password"
+            name="password"
+            label="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            disabled={loading}
+          />
 
           <Button type="submit" className="w-full" disabled={loading} size="lg">
             {loading ? (
