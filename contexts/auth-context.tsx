@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useState, useCallback, type ReactNode } from "react"
+import { getApiUrl } from "@/lib/api-url"
 import type { User, AuthState } from "@/types"
 
 interface AuthContextType extends AuthState {
@@ -11,8 +12,6 @@ interface AuthContextType extends AuthState {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -55,7 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     try {
-      const response = await fetch(`${API_URL}/auth/refresh`, {
+      const response = await fetch(`${getApiUrl()}/auth/refresh`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refresh_token: refreshToken }),
@@ -93,7 +92,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (username: string, password: string) => {
     setIsLoading(true)
     try {
-      const response = await fetch(`${API_URL}/auth/login`, {
+      const response = await fetch(`${getApiUrl()}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -103,7 +102,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }),
       })
 
-      const data = await response.json()
+      const contentType = response.headers.get("content-type") || ""
+      const data = contentType.includes("application/json") ? await response.json() : {}
 
       if (!response.ok) {
         return { success: false, message: data.message || "Login gagal" }
@@ -138,7 +138,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Notify backend about logout
     if (accessToken) {
       try {
-        await fetch(`${API_URL}/auth/logout`, {
+        await fetch(`${getApiUrl()}/auth/logout`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
