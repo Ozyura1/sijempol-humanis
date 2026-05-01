@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser"
 import dotenv from "dotenv"
 import bcrypt from "bcryptjs"
 import authRoutes from "./routes/auth.js"
+import otpRoutes from "./routes/otp.js"
 import agendaRoutes from "./routes/agendas.js"
 import aspirasiRoutes from "./routes/aspirasis.js"
 import resourceRoutes from "./routes/resources.js"
@@ -86,6 +87,7 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api/auth", authRoutes)
+app.use("/api/auth/otp", otpRoutes)
 app.use("/api/agendas", agendaRoutes)
 app.use("/api/aspirasis", aspirasiRoutes)
 app.use("/api/addresses", addressRoutes)

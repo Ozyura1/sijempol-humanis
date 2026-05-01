@@ -28,6 +28,7 @@ const defaultData = {
   marriages: [],
   moves: [],
   family_cards: [],
+  otp_requests: [],
 }
 
 await db.read()

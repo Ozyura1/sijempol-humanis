@@ -3,6 +3,7 @@ import db, { nextId } from "../db.js"
 import { authenticate } from "./authMiddleware.js"
 import { requireRole } from "../middleware/roleGuard.js"
 import { validateSubmissionData, validateStatusChange } from "../middleware/validation.js"
+import { sendApprovalEmail, sendRejectionEmail } from "../utils/email.js"
 
 const allowedResources = [
   "id_cards",
@@ -183,6 +184,27 @@ function createResourceRouter(collectionName) {
       updated_at: new Date().toISOString(),
     }
     await db.write()
+
+    // Send email notification if status changed to approved or rejected
+    try {
+      const updatedRecord = db.data[collectionName][index]
+      const user = db.data.users.find((u) => u.id === existing.user_id)
+
+      if (user && user.email) {
+        if (new_status === "approved") {
+          await sendApprovalEmail(
+            user.email,
+            user.name || user.username,
+            collectionName,
+            updatedRecord.id
+          )
+        }
+      }
+    } catch (error) {
+      console.error("Error sending status change email:", error)
+      // Don't fail the request if email fails
+    }
+
     res.json(db.data[collectionName][index])
   })
 
@@ -212,6 +234,26 @@ function createResourceRouter(collectionName) {
       updated_at: new Date().toISOString(),
     }
     await db.write()
+
+    // Send rejection email notification
+    try {
+      const updatedRecord = db.data[collectionName][index]
+      const user = db.data.users.find((u) => u.id === existing.user_id)
+
+      if (user && user.email) {
+        await sendRejectionEmail(
+          user.email,
+          user.name || user.username,
+          collectionName,
+          updatedRecord.id,
+          rejection_reason
+        )
+      }
+    } catch (error) {
+      console.error("Error sending rejection email:", error)
+      // Don't fail the request if email fails
+    }
+
     res.json(db.data[collectionName][index])
   })
 
