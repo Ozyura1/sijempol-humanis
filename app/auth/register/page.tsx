@@ -10,7 +10,7 @@ import { Spinner } from "@/components/ui/spinner"
 import { PasswordInput } from "@/components/auth/password-input"
 import { Clock } from "lucide-react"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api"
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://sijempolhumanis.web.id/api"
 
 async function readApiMessage(response: Response) {
   try {
