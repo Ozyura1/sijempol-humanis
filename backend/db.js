@@ -33,10 +33,26 @@ const defaultData = {
 
 await db.read()
 if (!db.data) {
-  db.data = defaultData
+  db.data = {}
+}
+
+let changed = false
+for (const [collectionName, defaultValue] of Object.entries(defaultData)) {
+  if (!Array.isArray(db.data[collectionName])) {
+    db.data[collectionName] = defaultValue
+    changed = true
+  }
+}
+
+if (changed) {
+  await db.write()
 }
 
 function nextId(collectionName) {
+  if (!Array.isArray(db.data[collectionName])) {
+    db.data[collectionName] = []
+  }
+
   const collection = db.data[collectionName]
   if (!collection || collection.length === 0) return 1
   return Math.max(...collection.map((item) => item.id)) + 1

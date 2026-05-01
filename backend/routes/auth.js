@@ -1,48 +1,15 @@
 import express from "express"
 import bcrypt from "bcryptjs"
-import db, { nextId } from "../db.js"
-import { generateTokens, generateToken, authenticate, blacklistToken, verifyRefreshToken } from "./authMiddleware.js"
-import { validateBody, validatePassword, validateEmail } from "../middleware/validation.js"
+import db from "../db.js"
+import { generateTokens, authenticate, blacklistToken, verifyRefreshToken } from "./authMiddleware.js"
+import { validatePassword } from "../middleware/validation.js"
 
 const router = express.Router()
 
-router.post("/register", validateEmail, async (req, res) => {
-  const { username, password, name, email } = req.body
-
-  if (!username || !password) {
-    return res.status(400).json({ message: "Username dan password wajib diisi." })
-  }
-
-  if (username.length < 3) {
-    return res.status(400).json({ message: "Username minimal 3 karakter." })
-  }
-
-  if (password.length < 6) {
-    return res.status(400).json({ message: "Password minimal 6 karakter." })
-  }
-
-  await db.read()
-  const exists = db.data.users.find((user) => user.username === username)
-  if (exists) {
-    return res.status(409).json({ message: "Username sudah terdaftar." })
-  }
-
-  const hashedPassword = bcrypt.hashSync(password, 10)
-  const user = {
-    id: nextId("users"),
-    username,
-    password: hashedPassword,
-    name: name || null,
-    email: email || null,
-    role: "user",
-    created_at: new Date().toISOString(),
-  }
-
-  db.data.users.push(user)
-  await db.write()
-
-  const responseUser = { id: user.id, username: user.username, name: user.name, email: user.email, role: user.role, created_at: user.created_at }
-  return res.status(201).json({ message: "Akun berhasil dibuat.", user: responseUser })
+router.post("/register", async (req, res) => {
+  return res.status(410).json({
+    message: "Registrasi sekarang wajib verifikasi OTP. Gunakan /api/auth/otp/request-otp lalu /api/auth/otp/verify-otp.",
+  })
 })
 
 router.post("/login", async (req, res) => {

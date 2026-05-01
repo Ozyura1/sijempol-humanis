@@ -26,7 +26,9 @@ Server akan berjalan di `http://localhost:8000` secara default.
 ## Endpoint penting
 
 - `POST /api/auth/login`
-- `POST /api/auth/register`
+- `POST /api/auth/otp/request-otp`
+- `POST /api/auth/otp/verify-otp`
+- `POST /api/auth/otp/resend-otp`
 - `GET /api/auth/profile`
 - `GET /api/agendas`
 - `POST /api/aspirasis`
